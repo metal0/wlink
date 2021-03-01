@@ -6,7 +6,7 @@ from loguru import logger
 
 from prowl.utility.string import int_to_bytes, bytes_to_int
 from .sha import sha1, sha1v
-from ..protocol.auth.errors import InvalidLogin
+from ..auth.errors import InvalidLogin
 
 default_prime = 62100066509156017342069496140902949863249758336000796928566441170293728648119
 default_generator = 7

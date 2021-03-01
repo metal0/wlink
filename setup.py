@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(
-	name='prowl.protocol',
+	name='prowl',
 	version='0.0.1',
 	packages=[
 		'prowl',
@@ -10,7 +10,7 @@ setup(
 		'prowl.protocol.auth.packets', 'prowl.protocol.world.packets'
 	],
 	package_dir={'': 'src'},
-	url='https://github.com/ostoic/pont.protocol',
+	url='https://github.com/ostoic/prowl',
 	license='GPLv3',
 	author='Shaun Ostoic',
 	author_email='ostoic@uwindsor.ca',

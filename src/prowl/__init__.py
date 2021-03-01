@@ -1,2 +1,2 @@
-from . import protocol, events
+from . import events, world, auth
 from .guid import Guid
