@@ -5,12 +5,12 @@ setup(
 	version='0.0.1',
 	packages=[
 		'wlink',
-		'wlink.protocol', 'wlink.cryptography', 'wlink.utility',
-		'wlink.protocol.auth', 'wlink.protocol.world',
-		'wlink.protocol.auth.packets', 'wlink.protocol.world.packets'
+		'wlink.cryptography', 'wlink.utility',
+		'wlink.auth', 'wlink.world',
+		'wlink.auth.packets', 'wlink.world.packets'
 	],
 	package_dir={'': 'src'},
-	url='https://github.com/ostoic/prowl',
+	url='https://github.com/ostoic/wlink',
 	license='GPLv3',
 	author='Shaun Ostoic',
 	author_email='ostoic@uwindsor.ca',
