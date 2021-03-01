@@ -1,4 +1,4 @@
-from prowl.world.packets import SMSG_AUTH_RESPONSE, SMSG_ADDON_INFO, ServerSize, Opcode, ServerHeader, \
+from wlink.world.packets import SMSG_AUTH_RESPONSE, SMSG_ADDON_INFO, ServerSize, Opcode, ServerHeader, \
 	AuthResponse, Expansion
 
 def test_server_header_parsing():

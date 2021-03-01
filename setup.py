@@ -1,13 +1,13 @@
 from setuptools import setup
 
 setup(
-	name='prowl',
+	name='wlink',
 	version='0.0.1',
 	packages=[
-		'prowl',
-		'prowl.protocol', 'prowl.cryptography', 'prowl.utility',
-		'prowl.protocol.auth', 'prowl.protocol.world',
-		'prowl.protocol.auth.packets', 'prowl.protocol.world.packets'
+		'wlink',
+		'wlink.protocol', 'wlink.cryptography', 'wlink.utility',
+		'wlink.protocol.auth', 'wlink.protocol.world',
+		'wlink.protocol.auth.packets', 'wlink.protocol.world.packets'
 	],
 	package_dir={'': 'src'},
 	url='https://github.com/ostoic/prowl',

@@ -1,6 +1,6 @@
-from prowl.auth import Response, Opcode
-from prowl.auth.packets import ChallengeRequest, ChallengeResponse, ProofResponse, ProofRequest
-from prowl.utility.string import bytes_to_int
+from wlink.auth import Response, Opcode
+from wlink.auth.packets import ChallengeRequest, ChallengeResponse, ProofResponse, ProofRequest
+from wlink.utility.string import bytes_to_int
 
 def test_challenge_request_packet1():
 	packet = bytes.fromhex('00082300576f57000303053430363878006e69570053556e65d4feffff0ab3cd730541444d494e')

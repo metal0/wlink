@@ -1,4 +1,4 @@
-from prowl.world.packets import SMSG_WHO
+from wlink.world.packets import SMSG_WHO
 
 def test_SMSG_WHO():
 	data = b'\x00\nc\x00\x00\x00\x00\x00\x00\x00\x00\x00'

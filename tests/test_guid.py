@@ -1,4 +1,4 @@
-from prowl.guid import Guid, GuidType
+from wlink.guid import Guid, GuidType
 
 def test_guid():
 	guid = Guid(counter=3, high=7)

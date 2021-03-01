@@ -1,5 +1,5 @@
-from prowl.world.packets import CMSG_GET_MAIL_LIST, MailType, SMSG_MAIL_LIST_RESULT
-from prowl.guid import Guid
+from wlink.world.packets import CMSG_GET_MAIL_LIST, MailType, SMSG_MAIL_LIST_RESULT
+from wlink.guid import Guid
 
 def test_CMSG_GET_MAIL_LIST():
 	# header=Container(size=0, opcode= <Opcode.CMSG_GET_MAIL_LIST: 570>), mailbox = 215099663085715459)

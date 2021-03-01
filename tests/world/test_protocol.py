@@ -1,9 +1,9 @@
 import json
 import trio
 
-from prowl.guid import Guid
-from prowl.world import WorldClientProtocol, WorldServerProtocol
-from prowl.world.packets import parse, Opcode, ClientHeader, Expansion, AuthResponse, Gender, Race, CombatClass
+from wlink.guid import Guid
+from wlink.world import WorldClientProtocol, WorldServerProtocol
+from wlink.world.packets import parse, Opcode, ClientHeader, Expansion, AuthResponse, Gender, Race, CombatClass
 
 logins_filename = 'C:\\Users\\Owner\\Documents\\WoW\\servers_config.json'
 with open(logins_filename) as f:

@@ -1,5 +1,5 @@
-from prowl.guid import Guid
-from prowl.world.packets import SMSG_DUEL_REQUESTED
+from wlink.guid import Guid
+from wlink.world.packets import SMSG_DUEL_REQUESTED
 
 
 def test_SMSG_DUEL_REQUESTED():

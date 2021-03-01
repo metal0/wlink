@@ -1,4 +1,4 @@
-from prowl.world.packets import SMSG_MESSAGECHAT, Opcode, MessageType, Language, Guid, SMSG_GM_MESSAGECHAT, \
+from wlink.world.packets import SMSG_MESSAGECHAT, Opcode, MessageType, Language, Guid, SMSG_GM_MESSAGECHAT, \
 	CMSG_MESSAGECHAT
 
 def test_CMSG_MESSAGECHAT():

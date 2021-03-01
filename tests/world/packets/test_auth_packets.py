@@ -1,6 +1,6 @@
 import random
 
-from prowl.world.packets import SMSG_AUTH_CHALLENGE, CMSG_AUTH_SESSION, AuthResponse, Opcode, \
+from wlink.world.packets import SMSG_AUTH_CHALLENGE, CMSG_AUTH_SESSION, AuthResponse, Opcode, \
 	SMSG_AUTH_RESPONSE, Expansion
 
 

@@ -1,5 +1,5 @@
-from prowl.auth.packets import RealmlistResponse
-from prowl.auth.realm import RealmFlags, RealmType, RealmStatus
+from wlink.auth.packets import RealmlistResponse
+from wlink.auth.realm import RealmFlags, RealmType, RealmStatus
 
 def test_realmlist_response_decode_encode():
 	data = b'\x10\x87\x00\x00\x00\x00\x00\x03\x00\x01\x00\x00Blackrock [PvP only]\x0054.36.105.147:8086\x00\x00\x00\x00\x00\x08\x08\n\x01\x00\x00Icecrown\x0054.36.105.148:8085\x00\x00\x00@@\n\x08\x07\x01\x00\x00Lordaeron\x0054.36.105.146:9427\x00\x00\x00\x00@\x03\x08\x06'

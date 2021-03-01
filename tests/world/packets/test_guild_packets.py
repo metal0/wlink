@@ -1,5 +1,5 @@
-from prowl.guid import Guid
-from prowl.world.packets import CMSG_GUILD_QUERY, SMSG_GUILD_QUERY_RESPONSE, SMSG_GUILD_ROSTER, MemberStatus, \
+from wlink.guid import Guid
+from wlink.world.packets import CMSG_GUILD_QUERY, SMSG_GUILD_QUERY_RESPONSE, SMSG_GUILD_ROSTER, MemberStatus, \
 	CombatClass, Gender, SMSG_GUILD_EVENT, GuildEventType, SMSG_GUILD_INVITE
 
 
