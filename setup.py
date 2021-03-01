@@ -1,9 +1,14 @@
 from setuptools import setup
 
 setup(
-	name='pont.protocol',
+	name='prowl.protocol',
 	version='0.0.1',
-	packages=['pont', 'pont.protocol', 'pont.cryptography', 'pont.utility'],
+	packages=[
+		'prowl',
+		'prowl.protocol', 'prowl.cryptography', 'prowl.utility',
+		'prowl.protocol.auth', 'prowl.protocol.world',
+		'prowl.protocol.auth.packets', 'prowl.protocol.world.packets'
+	],
 	package_dir={'': 'src'},
 	url='https://github.com/ostoic/pont.protocol',
 	license='GPLv3',
