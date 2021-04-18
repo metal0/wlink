@@ -3,12 +3,12 @@ import hashlib
 import hmac
 import random
 import traceback
-from typing import Optional, List
+from typing import Optional, List, Tuple
 from construct import ConstructError
 
 from wlink.world.packets import *
 from wlink.world.packets.parse import WorldServerPacketParser, WorldClientPacketParser
-from wlink.utility.construct import compute_packed_guid_byte_size, pack_guid
+from wlink.utility.construct import compute_packed_guid_byte_size, pack_guid, NamedConstruct
 from wlink.world.errors import ProtocolError, Disconnected
 from wlink.cryptography import rc4
 from wlink.log import logger
@@ -245,6 +245,23 @@ class WorldClientProtocol(WorldProtocol):
 			CMSG_CHAR_ENUM,
 		)
 
+	async def send_CMSG_CHAR_RENAME(self, new_name: str, guid):
+		"""
+		Sends an encrypted CMSG_CHAR_RENAME packet.
+		:return: None.
+		"""
+		await self._send_encrypted_packet(
+			CMSG_CHAR_RENAME,
+			guid=guid,
+			new_name=new_name
+		)
+
+		# CMSG_CHAR_RENAME = construct.Struct(
+		# 	'header' / ClientHeader(Opcode.CMSG_CHAR_RENAME),
+		# 	'guid' / GuidConstruct(Guid),
+		# 	'new_name' / construct.CString('utf8')
+		# )
+
 	async def send_CMSG_PING(self, id, latency=60):
 		"""
 		Sends an encrypted CMSG_PING packet.
@@ -271,6 +288,9 @@ class WorldClientProtocol(WorldProtocol):
 		Sends a CMSG_GET_MAIL_LIST packet with optional encryption.
 		:return: None.
 		"""
+		if type(mailbox) is int:
+			mailbox = Guid(mailbox)
+
 		await self._send_encrypted_packet(
 			CMSG_GET_MAIL_LIST,
 			mailbox=mailbox
@@ -309,6 +329,67 @@ class WorldClientProtocol(WorldProtocol):
 			header=dict(size=4 + len(name) + 1),
 			name=name
 		)
+
+	async def send_CMSG_AUCTION_SELL_ITEM(self, auctioneer, auction_items: list, bid: int, buyout: int, expiry_time: int):
+		"""
+		Sends a CMSG_AUCTION_SELL_ITEM packet with optional encryption.
+		:return: None.
+		"""
+		if type(auctioneer) is int:
+			auctioneer = Guid(value=auctioneer)
+
+		data_size = 8 + len(auction_items) * (8 + 4) + 4 + 4 + 4 + 4
+		await self._send_encrypted_packet(CMSG_AUCTION_SELL_ITEM,
+			header=dict(size=4 + data_size),
+			auctioneer=auctioneer, auction_items=auction_items,
+			bid=bid, buyout=buyout, expiry_time=expiry_time
+		)
+
+	async def send_CMSG_AUCTION_PLACE_BID(self, auctioneer, auction_id: int, price: int):
+		"""
+		Sends a CMSG_AUCTION_PLACE_BID packet with optional encryption.
+		:return: None.
+		"""
+		if type(auctioneer) is int:
+			auctioneer = Guid(value=auctioneer)
+
+		data_size = 8 + 4 + 4
+		await self._send_encrypted_packet(CMSG_AUCTION_PLACE_BID,
+			header=dict(size=4 + data_size),
+			auctioneer=auctioneer,
+			auction_id=auction_id, price=price
+		)
+
+	async def send_CMSG_AUCTION_LIST_PENDING_SALES(self, auctioneer):
+		"""
+		Sends a CMSG_AUCTION_LIST_PENDING_SALES packet with optional encryption.
+		:return: None.
+		"""
+		if type(auctioneer) is int:
+			auctioneer = Guid(value=auctioneer)
+
+		data_size = 8
+
+		await self._send_encrypted_packet(CMSG_AUCTION_LIST_PENDING_SALES,
+            header=dict(size=4 + data_size),
+            auctioneer=auctioneer,
+        )
+
+	async def send_CMSG_AUCTION_LIST_OWNER_ITEMS(self, auctioneer, list_start: int = 0):
+		"""
+		Sends a CMSG_AUCTION_LIST_OWNER_ITEMS packet with optional encryption.
+		:return: None.
+		"""
+		if type(auctioneer) is int:
+			auctioneer = Guid(value=auctioneer)
+
+		data_size = 8 + 4
+
+		await self._send_encrypted_packet(CMSG_AUCTION_LIST_OWNER_ITEMS,
+          header=dict(size=4 + data_size),
+          auctioneer=auctioneer,
+          list_start=list_start
+        )
 
 	async def send_CMSG_AUCTION_LIST_ITEMS(self, auctioneer, search_term: str, list_start: int = 0, min_level=0, max_level=80,
 		slot_id=0, category=0, subcategory=0, rarity=0, usable=False, is_full=True
@@ -352,7 +433,7 @@ class WorldClientProtocol(WorldProtocol):
 		"""
 		await self._send_encrypted_packet(
 			CMSG_PLAYER_LOGIN,
-			player_guid=guid
+			guid=guid
 		)
 
 	async def send_CMSG_LOGOUT_REQUEST(self):
@@ -380,6 +461,17 @@ class WorldClientProtocol(WorldProtocol):
 		"""
 		await self._send_encrypted_packet(
 			CMSG_DUEL_ACCEPTED
+		)
+
+	async def send_CMSG_GUILD_INFO_TEXT(self, info: str):
+		"""
+		Sends an encrypted CMSG_GUILD_INFO_TEXT packet.
+		:return: None.
+		"""
+		await self._send_encrypted_packet(
+			CMSG_GUILD_INFO_TEXT,
+			header=dict(size=4 + len(info) + 1),
+			info=info
 		)
 
 	async def send_CMSG_GUILD_QUERY(self, guild_id: int):
@@ -597,11 +689,10 @@ class WorldServerProtocol(WorldProtocol):
 		return self.encrypt(packed_header) +  data[body_start:]
 
 	def decrypt_packet(self, data: bytes):
-		# logger.debug(f'(Server) {data=}')
 		if data is None or len(data) == 0:
 			return None
 
-		return self.decrypt(data[0:6]) + data[6:]
+		return self.decrypt(data[:6]) + data[6:]
 
 	async def next_decrypted_packet(self):
 		# Receive header first
@@ -619,19 +710,23 @@ class WorldServerProtocol(WorldProtocol):
 			bytes_left = header.size - 4
 			logger.log('PACKETS', f'{header=}')
 
-			if bytes_left > 0:
+			data = header_data
+			while bytes_left > 0:
 				logger.log('PACKETS', f'Listening for {bytes_left} byte body...')
 				body = await self.receive_some(max_bytes=bytes_left)
-				data = header_data + body
-				# logger.log('PACKETS', f'{data=}')
-
-				if data is None or len(data) == 0:
+				if body is None or len(data) == 0:
 					raise ProtocolError('received EOF from server')
-			else:
-				data = header
+
+				data += body
+				bytes_left -= len(body)
 
 			try:
+				if header.opcode == Opcode.CMSG_AUCTION_SELL_ITEM:
+					print('hey')
+
+				logger.log('PACKETS', f'{data=}')
 				packet = self.parser.parse(data, header)
+				logger.log('PACKETS', f'{packet=}')
 				self._num_packets_received += 1
 				return packet
 
@@ -646,10 +741,10 @@ class WorldServerProtocol(WorldProtocol):
 				raise ProtocolError('Invalid opcode, stream might be out of sync')
 
 	async def send_SMSG_AUTH_RESPONSE(self,
-	                                  response: AuthResponse, expansion=Expansion.wotlk,
-	                                  queue_position: Optional[int] = None,
-	                                  billing=None
-	                                  ):
+          response: AuthResponse, expansion=Expansion.wotlk,
+          queue_position: Optional[int] = None,
+          billing=None
+      ):
 		"""
 		Sends an encrypted SMSG_AUTH_RESPONSE packet.
 		:return: None.
@@ -673,8 +768,9 @@ class WorldServerProtocol(WorldProtocol):
 		)
 
 	async def send_SMSG_AUTH_CHALLENGE(self, server_seed: int = random.getrandbits(32),
-	                                   encryption_seed1: int = random.getrandbits(16),
-	                                   encryption_seed2: int = random.getrandbits(16)):
+       encryption_seed1: int = random.getrandbits(16),
+       encryption_seed2: int = random.getrandbits(16)
+	):
 		"""
 		Sends an unencrypted SMSG_AUTH_CHALLENGE packet.
 		:param server_seed:
@@ -697,6 +793,9 @@ class WorldServerProtocol(WorldProtocol):
 		info_size = len(info['name']) + 1 + len(info['realm_name']) + 1 + 4
 		guid_size = compute_packed_guid_byte_size(pack_guid(guid)[0])
 
+		if type(info) is NamedConstruct:
+			info = info.as_dict()
+
 		await self._send_encrypted_packet(
 			SMSG_NAME_QUERY_RESPONSE,
 			header=dict(size=2 + guid_size + 2 + info_size),
@@ -710,8 +809,20 @@ class WorldServerProtocol(WorldProtocol):
 		"""
 		await self._send_encrypted_packet(
 			SMSG_WHOIS,
-			header={'size': 2 + len(message) + 1},
+			header=dict(size=2 + len(message) + 1),
 			message=message
+		)
+
+	async def send_SMSG_LOGIN_VERIFY_WORLD(self, map: int, position, rotation) -> SMSG_LOGIN_VERIFY_WORLD:
+		"""
+		Receives an encrypted SMSG_LOGIN_VERIFY_WORLD packet.
+		:return: a parsed SMSG_LOGIN_VERIFY_WORLD packet.
+		"""
+		return await self._send_encrypted_packet(
+			SMSG_LOGIN_VERIFY_WORLD,
+			map=map,
+			position=position,
+			rotation=rotation
 		)
 
 	async def send_SMSG_WARDEN_DATA(self, command=51, module_id=0, module_key=0, size=100):
@@ -746,7 +857,7 @@ class WorldServerProtocol(WorldProtocol):
 		"""
 		await self._send_encrypted_packet(
 			SMSG_ADDON_INFO,
-			header={'size': len(data) + 2},
+			header=dict(size=len(data) + 2),
 			data=data,
 		)
 
@@ -768,7 +879,7 @@ class WorldServerProtocol(WorldProtocol):
 		ranks_size = sum((len(s) + 1 for s in ranks))
 		await self._send_encrypted_packet(
 			SMSG_GUILD_QUERY_RESPONSE,
-			header={'size': 4 + len(name) + 1 + ranks_size + 4 * 6},
+			header=dict(size=4 + len(name) + 1 + ranks_size + 4 * 6),
 			guild_id=guild_id,
 			name=name,
 			ranks=ranks,
@@ -782,12 +893,12 @@ class WorldServerProtocol(WorldProtocol):
 
 	async def send_SMSG_GUILD_INVITE(self, inviter: str, guild: str):
 		"""
-		Sends an encrypted CMSG_GUILD_DECLINE packet.
+		Sends an encrypted SMSG_GUILD_INVITE packet.
 		:return: None.
 		"""
 		await self._send_encrypted_packet(
 			SMSG_GUILD_INVITE,
-			header={'size': len(inviter) + len(guild) + 2},
+			header=dict(size=len(inviter) + len(guild) + 2),
 			inviter=inviter,
 			guild=guild
 		)
@@ -799,7 +910,7 @@ class WorldServerProtocol(WorldProtocol):
 		"""
 		await self._send_encrypted_packet(
 			SMSG_GROUP_INVITE,
-			header={'size': 1 + len(inviter) + 4 + 1 + 4},
+			header=dict(size=1 + len(inviter) + 4 + 1 + 4),
 			in_group=in_group,
 			inviter=inviter
 		)
@@ -893,10 +1004,19 @@ class WorldServerProtocol(WorldProtocol):
 			CMSG_DUEL_ACCEPTED
 		)
 
+	async def receive_CMSG_GUILD_INFO_TEXT(self) -> CMSG_GUILD_INFO_TEXT:
+		"""
+		Sends an encrypted CMSG_GUILD_INFO_TEXT packet.
+		:return: a `CMSG_GUILD_INFO_TEXT` packet.
+		"""
+		return await self._receive_encrypted_packet(
+			CMSG_GUILD_INFO_TEXT,
+		)
+
 	async def receive_CMSG_GUILD_QUERY(self) -> CMSG_GUILD_QUERY:
 		"""
 		Receives an encrypted CMSG_GUILD_QUERY packet.
-		:return: None.
+		:return: a CMSG_GUILD_QUERY packet.
 		"""
 		return await self._receive_encrypted_packet(
 			CMSG_GUILD_QUERY,
@@ -960,7 +1080,6 @@ class WorldServerProtocol(WorldProtocol):
 		:return: a parsed CMSG_GROUP_INVITE packet.
 		"""
 		return await self._receive_encrypted_packet(
-			'CMSG_GROUP_INVITE',
 			CMSG_GROUP_INVITE
 		)
 

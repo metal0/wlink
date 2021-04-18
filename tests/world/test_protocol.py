@@ -1,9 +1,16 @@
 import json
+import construct
 import trio
+
+from wlink.log import logger, configure_log
+configure_log(logger, packets_level=5)
 
 from wlink.guid import Guid
 from wlink.world import WorldClientProtocol, WorldServerProtocol
-from wlink.world.packets import parse, Opcode, ClientHeader, Expansion, AuthResponse, Gender, Race, CombatClass
+from wlink.world.packets import parse, Opcode, ClientHeader, Expansion, AuthResponse, Gender, Race, CombatClass, \
+	CMSG_GUILD_INFO_TEXT, CMSG_AUCTION_LIST_ITEMS, SMSG_NAME_QUERY_RESPONSE, SMSG_AUTH_RESPONSE, NameInfo, \
+	CMSG_PING, SMSG_ADDON_INFO, CMSG_GET_MAIL_LIST, CMSG_AUCTION_LIST_OWNER_ITEMS, CMSG_AUCTION_LIST_PENDING_SALES, \
+	CMSG_AUCTION_PLACE_BID, CMSG_AUCTION_SELL_ITEM, AuctionSellData, CMSG_GUILD_ROSTER
 
 logins_filename = 'C:\\Users\\Owner\\Documents\\WoW\\servers_config.json'
 with open(logins_filename) as f:
@@ -17,82 +24,107 @@ async def find_client_packets():
 	for i in range(len(data)):
 		try:
 			header = ClientHeader().parse(data[i:])
-
 			packet = parser.parse(data[i:], header)
 			print(parser.parser(packet.header.opcode).build(packet))
 			print(f'{packet=}')
 		except Exception as e:
 			pass
 
-async def test_protocol_parsing_decryption():
-	with trio.fail_after(2):
-		session_key = 887638991071640811242800621506026194914017482863646559938463468713468253926173117812986327918380
-		(client_stream, server_stream) = trio.testing.memory_stream_pair()
+async def run_client_server_protocol_sanity_test(client, server, packet, **params):
+	packet_name = None
+	for name, var in globals().items():
+		if var == packet:
+			packet_name = name
 
-		client = WorldClientProtocol(client_stream, session_key=session_key)
-		await client.send_CMSG_AUTH_SESSION(ac_login['username'], 1, 2, 3)
+	if packet_name is None:
+		raise ValueError('Unable to determine packet name')
 
-		server = WorldServerProtocol(server_stream, session_key=session_key)
-		auth_session = await server.receive_CMSG_AUTH_SESSION()
+	send = getattr(client, f'send_{packet_name}')
+	await send(**params)
 
-		assert auth_session.header.opcode == Opcode.CMSG_AUTH_SESSION
-		assert auth_session.build == 12340
-		assert auth_session.login_server_id == 0
-		assert auth_session.account_name == ac_login['username'].upper()
-		assert auth_session.client_seed == 1
-		assert auth_session.account_hash == 2
+	result = await server.next_decrypted_packet()
+	for key, value in params.items():
+		check = getattr(result, key)
+		# if packet_name == 'CMSG_AUCTION_SELL_ITEM':
+		# 	print(f'{result.items[0]=}')
+		print(f'compare: {key=} {packet_name=} {type(check)=} vs {value=}')
+		assert check == value
 
-		await client.send_CMSG_PING(id=10)
-		ping = await server.receive_CMSG_PING()
+async def run_server_client_protocol_sanity_test(server, client, packet, **params):
+	packet_name = None
+	for name, var in globals().items():
+		if var == packet:
+			packet_name = name
 
-		assert ping.header.size == 12
-		assert ping.header.opcode == Opcode.CMSG_PING
-		assert ping.id == 10
-		assert ping.latency == 60
+	if packet_name is None:
+		raise ValueError('Unable to determine packet name')
 
-		addon_size = 0x7FFF
-		addon_data = bytes([1] * addon_size)
-		await server.send_SMSG_ADDON_INFO(data=addon_data)
+	send = getattr(server, f'send_{packet_name}')
+	await send(**params)
 
-		addon_info = await client.next_decrypted_packet()
-		assert addon_info.header.size == addon_size + 2
-		assert addon_info.header.opcode == Opcode.SMSG_ADDON_INFO
-		assert addon_info.data == addon_data
+	result = await client.next_decrypted_packet()
+	for key, value in params.items():
+		check = getattr(result, key)
+		assert check == value
 
-		await server.send_SMSG_AUTH_RESPONSE(
-			response=AuthResponse.ok,
-			expansion=Expansion.wotlk,
-			billing=dict(time_left=10),
-			queue_position=None
-		)
+async def test_protocol_packet_fns():
+	session_key = 887638991071640811242800621506026194914017482863646559938463468713468253926173117812986327918380
+	(client_stream, server_stream) = trio.testing.memory_stream_pair()
 
-		auth_response = await client.next_decrypted_packet()
-		assert auth_response.header.size == 13
-		assert auth_response.header.opcode == Opcode.SMSG_AUTH_RESPONSE
-		assert auth_response.response == AuthResponse.ok
-		assert auth_response.billing.time_left == 10
-		assert auth_response.billing.plan == 0
-		assert auth_response.billing.time_rested == 0
-		assert auth_response.queue_position is None
+	client = WorldClientProtocol(client_stream, session_key=session_key)
+	await client.send_CMSG_AUTH_SESSION(ac_login['username'], 1, 2, 3)
 
-		await server.send_SMSG_NAME_QUERY_RESPONSE(
-			guid=Guid(0), found=True,
-			info=dict(
-				name='Horse',
-				realm_name='BigTown',
+	server = WorldServerProtocol(server_stream, session_key=session_key)
+	auth_session = await server.receive_CMSG_AUTH_SESSION()
+	assert auth_session.header.opcode == Opcode.CMSG_AUTH_SESSION
+	assert auth_session.build == 12340
+	assert auth_session.login_server_id == 0
+	assert auth_session.account_name == ac_login['username'].upper()
+	assert auth_session.client_seed == 1
+	assert auth_session.account_hash == 2
+
+	cmsg_tests = [
+		(CMSG_PING, dict(id=10, latency=60)),
+		(CMSG_GUILD_INFO_TEXT, dict(info='Guild info test')),
+		(CMSG_GUILD_ROSTER, dict()),
+		(CMSG_GET_MAIL_LIST, dict(mailbox=Guid(0xF11002FC1301873C))),
+		(CMSG_AUCTION_LIST_OWNER_ITEMS, dict(auctioneer=Guid(0xF1300021DE01375A), list_start=0)),
+		(CMSG_AUCTION_LIST_PENDING_SALES, dict(auctioneer=Guid(0xF1300021DE01375A))),
+		(CMSG_AUCTION_PLACE_BID, dict(auctioneer=Guid(0xF1300021DE01375A), auction_id=100, price=240000)),
+		(CMSG_AUCTION_SELL_ITEM, dict(
+			auctioneer=Guid(0xF1300021DE01375A),
+			bid=100000, buyout=200000, expiry_time=24,
+			auction_items=[
+				AuctionSellData.parse(AuctionSellData.build(dict(guid=Guid(0x1), count=7))),
+				AuctionSellData.parse(AuctionSellData.build(dict(guid=Guid(0x7), count=1))),
+		])),
+		(CMSG_AUCTION_LIST_ITEMS, dict(
+			auctioneer=Guid(0xF1300021DE01375A), search_term='Bread',
+			list_start=0, min_level=0, max_level=80,
+		    slot_id=0, category=0, subcategory=0,
+			rarity=0, usable=False, is_full=True
+		)),
+	]
+
+	smsg_tests = [
+		(SMSG_ADDON_INFO, dict(data=bytes([1] * 0x7FFF))),
+		(SMSG_NAME_QUERY_RESPONSE, dict(
+			guid=Guid(0x7), found=True,
+			info=NameInfo.parse(NameInfo.build(dict(
+				name='Pont', realm_name='Icecrown',
 				race=Race.human, gender=Gender.male,
-				combat_class=CombatClass.rogue,
-			)
-		)
+				combat_class=CombatClass.rogue
+			)))
+		)),
+		(SMSG_AUTH_RESPONSE, dict(
+			response=AuthResponse.ok, expansion=Expansion.wotlk,
+			billing=construct.Container(time_left=10, plan=0, time_rested=0),
+			queue_position=None
+		)),
+	]
 
-		name_query = await client.next_decrypted_packet()
-		assert name_query.header.size == 22
-		assert name_query.header.opcode == Opcode.SMSG_NAME_QUERY_RESPONSE
-		assert name_query.guid == Guid(0)
-		assert name_query.found is True
-		assert name_query.info.name == 'Horse'
-		assert name_query.info.realm_name == 'BigTown'
-		assert name_query.info.race == Race.human
-		assert name_query.info.gender == Gender.male
-		assert name_query.info.combat_class == CombatClass.rogue
-		assert name_query.info.declined is False
+	for test in cmsg_tests:
+		await run_client_server_protocol_sanity_test(client, server, test[0], **test[1])
+
+	for test in smsg_tests:
+		await run_server_client_protocol_sanity_test(server, client, test[0], **test[1])

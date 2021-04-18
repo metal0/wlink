@@ -3,10 +3,10 @@ from loguru import logger
 
 logging.basicConfig(level='INFO')
 
-def _config_logger(packets=15):
+def configure_log(logger, packets_level=5, events_level=15, messages_level=20):
 	logger.configure()
-	logger.level('PACKETS', no=packets, color='<blue>', icon='PACKETS')
-	logger.level('EVENTS', no=15, color='<yellow>', icon='EVENTS')
-	logger.level('MESSAGES', no=18, color='<green>', icon='MESSAGES')
+	logger.level('PACKETS', no=packets_level, color='<blue>', icon='PACKETS')
+	logger.level('EVENTS', no=events_level, color='<cyan>', icon='EVENTS')
+	logger.level('MESSAGES', no=messages_level, color='<green>', icon='MESSAGES')
 
-_config_logger()
+# configure_log()

@@ -1,3 +1,4 @@
+import collections
 import datetime
 import ipaddress
 import construct
@@ -136,6 +137,32 @@ class VersionStringFromBytesAdapter(construct.StringEncoded):
 	def _encode(self, obj: str, context, path):
 		return bytes(list(map(int, obj.split('.'))))
 
+class NamedConstruct:
+	def __init__(self, **kwargs):
+		self._fields = kwargs
+		for k, v in kwargs.items():
+				setattr(self, k, v)
+
+	def __getitem__(self, item):
+		return self._fields[item]
+
+	def __eq__(self, other):
+		if type(other) is dict:
+			access = lambda k: other[k]
+		else:
+			access = lambda k: getattr(other, k)
+
+		for k, v in self._fields.items():
+			if access(k) != v:
+				return False
+		return True
+
+	def __ne__(self, other):
+		return not (self == other)
+
+	def as_dict(self) -> dict:
+		return self._fields
+
 VersionString = VersionStringFromBytesAdapter
 
 Coordinates = lambda float_con = construct.Float32b: construct.Struct(
@@ -166,6 +193,7 @@ class PackedDateTime(construct.Adapter):
 		result |= obj.minute
 		return result
 		# return ((obj.year - 100) << 24) | (obj.month << 20) | ((obj.day - 1) << 14)  | (obj.weekday() << 11) | (obj.hour << 6) | obj.minute
+
 
 class PackedCoordinates(construct.Adapter):
 	def __init__(self, position_type):

@@ -127,14 +127,14 @@ def test_CMSG_PLAYER_LOGIN():
 	packet = CMSG_PLAYER_LOGIN.parse(data)
 
 	assert packet.header.size == 12
-	assert packet.player_guid == Guid(counter=1, type=GuidType.player)
+	assert packet.guid == Guid(counter=1, type=GuidType.player)
 	print(packet)
 
 	data = b'\x00\x0c=\x00\x00\x000\x00\x00\x00\x00\x00\x00\x00'
 	packet = CMSG_PLAYER_LOGIN.parse(data)
 
 	assert packet.header.size == 12
-	assert packet.player_guid == Guid(0x30)
+	assert packet.guid == Guid(0x30)
 
 def test_SMSG_TIME_SYNC_REQ():
 	data = bytes.fromhex('000690033E010000')

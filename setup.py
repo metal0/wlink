@@ -9,6 +9,7 @@ setup(
 		'wlink.auth', 'wlink.world',
 		'wlink.auth.packets', 'wlink.world.packets'
 	],
+
 	package_dir={'': 'src'},
 	url='https://github.com/ostoic/wlink',
 	license='GPLv3',

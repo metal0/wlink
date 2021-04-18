@@ -3,7 +3,9 @@ import datetime
 import construct
 from wlink import Guid
 from wlink.guid import GuidType
-from wlink.utility.construct import AddressPort, unpack_guid, GuidUnpacker, pack_guid, PackedDateTime, PackedCoordinates
+from wlink.utility.construct import AddressPort, unpack_guid, GuidUnpacker, pack_guid, PackedDateTime, \
+	PackedCoordinates, NamedConstruct
+from wlink.world.packets import CombatClass, Race, Gender
 
 
 def test_address_port():
@@ -74,3 +76,20 @@ def test_packed_coordinates():
 	assert packet.y == 1
 	assert packet.z == 3
 
+
+def test_named_construct():
+	pos = NamedConstruct(
+		name='Pont', realm_name='Icecrown',
+		gender=Gender.male, combat_class=CombatClass.rogue,
+		declined=False
+	)
+
+	assert {
+		'_io': 2,
+		'combat_class': CombatClass.rogue,
+		'declined': False,
+		'gender': Gender.male,
+		'name': 'Pont',
+		'race': Race.human,
+		'realm_name': 'Icecrown'
+	} == pos

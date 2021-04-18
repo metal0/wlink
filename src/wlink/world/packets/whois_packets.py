@@ -1,7 +1,7 @@
 import construct
 
 from wlink.world.opcode import Opcode
-from .char_enum import CombatClass, Race, Gender
+from .character_enum_packets import CombatClass, Race, Gender
 from .headers import ClientHeader, ServerHeader
 from wlink.utility.construct import PackEnum
 

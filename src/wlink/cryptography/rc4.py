@@ -1,5 +1,3 @@
-from loguru import logger
-
 __all__ = ['RC4']
 
 # noinspection PyPackageRequirements

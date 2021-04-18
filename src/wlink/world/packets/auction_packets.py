@@ -27,14 +27,15 @@ SMSG_AUCTION_COMMAND_RESULT = construct.Struct(
 	'error' / construct.Int32sl,
 )
 
+AuctionSellData = construct.Struct(
+	'guid' / GuidConstruct(Guid),
+	'count' / construct.Int32ul
+)
+
 CMSG_AUCTION_SELL_ITEM = construct.Struct(
 	'header' / ClientHeader(Opcode.CMSG_AUCTION_SELL_ITEM),
 	'auctioneer' / GuidConstruct(Guid),
-	'items' / construct.PrefixedArray(construct.Int32ul, construct.Struct(
-		'guid' / GuidConstruct(Guid),
-		'count' / construct.Int32ul
-	)),
-
+	'auction_items' / construct.PrefixedArray(construct.Int32ul, AuctionSellData),
 	'bid' / construct.Int32ul,
 	'buyout' / construct.Int32ul,
 	'expiry_time' / construct.Int32ul,
