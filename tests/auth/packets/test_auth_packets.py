@@ -70,7 +70,6 @@ def test_challenge_response_packet1():
 	warmane_bug_data = bytes.fromhex('000000153ce50a2a341987445c88a85e650599a684a84b7f43c5c57921bd183f1db105010720b79b3e2a87823cab8f5ebfbf8eb10108535006298b5badbd5b53e1895e644b89ed5be899b7acc1a3514d8c93d997329fd6756f744b1be29c0a51a2c995b7cae5baa31e99a00b2157fc373fb369cdd2f100')
 	print(ChallengeResponse.parse(warmane_bug_data))
 
-
 def test_challenge_response_packet2():
 	packet = bytes.fromhex('0000009ef68afffcd1328866b564d4bb0b12249a8df90e07bcd6064845ab64b482e11c010720b79b3e2a87823cab8f5ebfbf8eb10108535006298b5badbd5b53e1895e644b89319782ba4be5e9fc8e11cf9d7261f450ee7344aee4e402f6a3d0319c7ac425eabaa31e99a00b2157fc373fb369cdd2f100')
 
@@ -109,6 +108,10 @@ def test_challenge_response_named_args():
 
 	assert ChallengeResponse.build(challenge_response) == packet
 
+	data = bytes.fromhex('000000675f54d1e65a382bc343730cac11dcaa4c0204a1a45a3e87c4b31bed6933eb55010720b79b3e2a87823cab8f5ebfbf8eb10108535006298b5badbd5b53e1895e644b8979604517f018fa18b3b99bb764cbcb33bed1e3db2ccc17bac1a2cb062e86cdd40166742b495c252c46876a1a3e7d18e200')
+	szn_response = ChallengeResponse.parse(data)
+	print(szn_response)
+
 def test_proof_request_packet1():
 	packet = bytes.fromhex('01aab3826c0963de7881f5741733d7b8c2fb98b6f14bf33a790e6d376793895a06f122681f01b74c8b4100f5856fbcc03d80da65f378f6fd38b5843abf6884d7ca207b4187b84ec6d10000')
 	proof_request = ProofRequest.parse(packet)
@@ -125,8 +128,11 @@ def test_proof_request_packet1():
 	szn_data = bytes.fromhex('01c37ba092fdd5896322660a26247140e03691b2a3176228bc907a3809340bf124734b27330d66a2b2a63c79418743b139de9e1ef6deb96d9392a937bef78f0c38ed8754edcf53ce000000')
 	print(ProofRequest.parse(szn_data))
 
-	warmane_bug_data = bytes.fromhex('018d8c4bd5e7985bea278ef2984544550992fe45364e7b96cc0af9b34c76ca121bb9ed4eb5945c14c0fe51fcb57fe0698da321795adeb96d9392a937bef78f0c38ed8754edcf53ce000000')
-	print(ProofRequest.parse(szn_data))
+	warmane_bug_data = bytes.fromhex('01b4a0084c3e0260a8c32fe49c363ec6078a6fa1c30abf02d6278bc89bee6c7e534419fc8c94bc9609cf870e9a05069515f716df542183affc8ca868831d2afed8df801855eb64174c0000')
+	print(ProofRequest.parse(warmane_bug_data))
+
+	warmane_bug_data = bytes.fromhex('01ea44fac86a0b894ca2b75a8f8054e4eae6f5ae342dc3431670c6954045f2b86ed243118a0c1d66baeecb4235b639272bf8436b44939342b73292c7b7b8f4a3dbe87656b4729d50f40000')
+	print(ProofRequest.parse(warmane_bug_data))
 
 def test_proof_request_packet2():
 	packet = ProofRequest.build({

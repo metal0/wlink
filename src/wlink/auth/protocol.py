@@ -1,5 +1,6 @@
 import trio
 
+import wlink.cryptography.sha
 from .packets import ChallengeRequest, parser, ChallengeResponse, ProofRequest, ProofResponse, RealmlistRequest, \
 	RealmlistResponse
 from .realm import RealmFlags
@@ -64,13 +65,13 @@ class AuthProtocol:
 		)))
 
 	async def send_proof_request(self, client_public: int, session_proof: int, checksum: int=4601254584545541958749308449812234986282924510, num_keys: int=0, security_flags: int=0):
-		await self._send_all(ProofRequest.build({
-			'client_public': client_public,
-			'session_proof': session_proof,
-			'checksum': checksum,
-			'num_keys': num_keys,
-			'security_flags': security_flags
-		}))
+		await self._send_all(ProofRequest.build(dict(
+			client_public=client_public,
+			session_proof=session_proof,
+			checksum=checksum,
+			num_keys=num_keys,
+			security_flags=security_flags
+		)))
 
 	async def receive_proof_request(self) -> ProofRequest:
 		data = await self._receive_some()

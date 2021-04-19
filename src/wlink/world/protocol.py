@@ -245,6 +245,36 @@ class WorldClientProtocol(WorldProtocol):
 			CMSG_CHAR_ENUM,
 		)
 
+	async def send_CMSG_CHAR_CREATE(self, name: str,
+        race=Race.human,
+        combat_class=CombatClass.rogue,
+        gender=Gender.male,
+        skin=0,
+        face=0,
+        hair_style=0,
+        hair_color=0,
+        facial_hair=0,
+        outfit_id=0,
+	):
+		"""
+		Sends an encrypted CMSG_CHAR_CREATE packet.
+		:return: None.
+		"""
+		await self._send_encrypted_packet(
+			CMSG_CHAR_CREATE,
+			header=dict(size=(len(name) + 1) + 9 + 4),
+			name=name,
+			race=race,
+			combat_class=combat_class,
+			gender=gender,
+			skin=skin,
+			face=face,
+			hair_style=hair_style,
+			hair_color=hair_color,
+			facial_hair=facial_hair,
+			outfit_id=outfit_id,
+		)
+
 	async def send_CMSG_CHAR_RENAME(self, new_name: str, guid):
 		"""
 		Sends an encrypted CMSG_CHAR_RENAME packet.
@@ -252,15 +282,10 @@ class WorldClientProtocol(WorldProtocol):
 		"""
 		await self._send_encrypted_packet(
 			CMSG_CHAR_RENAME,
+			header=dict(size=len(new_name) + 1 + 8 + 4),
 			guid=guid,
 			new_name=new_name
 		)
-
-		# CMSG_CHAR_RENAME = construct.Struct(
-		# 	'header' / ClientHeader(Opcode.CMSG_CHAR_RENAME),
-		# 	'guid' / GuidConstruct(Guid),
-		# 	'new_name' / construct.CString('utf8')
-		# )
 
 	async def send_CMSG_PING(self, id, latency=60):
 		"""
@@ -443,15 +468,6 @@ class WorldClientProtocol(WorldProtocol):
 		"""
 		await self._send_encrypted_packet(
 			CMSG_LOGOUT_REQUEST
-		)
-
-	async def send_CMSG_CHAR_RENAME(self):
-		"""
-		Sends an encrypted CMSG_CHAR_RENAME packet.
-		:return: None.
-		"""
-		await self._send_encrypted_packet(
-			CMSG_CHAR_RENAME
 		)
 
 	async def send_CMSG_DUEL_ACCEPTED(self):

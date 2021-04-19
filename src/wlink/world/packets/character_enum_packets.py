@@ -66,7 +66,7 @@ BagInfo = construct.Struct(
 
 CharacterInfo = construct.Struct(
 	'guid' / GuidConstruct(Guid),
-	'name' / construct.CString('ascii'),
+	'name' / construct.CString('utf8'),
 	'race' / PackEnum(Race),
 	'combat_class' / PackEnum(CombatClass),
 	'gender' / PackEnum(Gender),
@@ -87,6 +87,24 @@ CharacterInfo = construct.Struct(
 	'pet' / PetInfo,
 	'items' / construct.Array(19, ItemInfo),
 	'bags' / construct.Array(4, BagInfo)
+)
+
+CMSG_CHAR_CREATE = construct.Struct(
+	'header' / ClientHeader(Opcode.CMSG_CHAR_CREATE),
+	'name' / construct.CString('utf8'),
+	'race' / PackEnum(Race),
+	'combat_class' / PackEnum(CombatClass),
+	'gender' / PackEnum(Gender),
+	'skin' / construct.Byte,
+	'face' / construct.Byte,
+	'hair_style' / construct.Byte,
+	'hair_color' / construct.Byte,
+	'facial_hair' / construct.Byte,
+	'outfit_id' / construct.Byte,
+)
+
+SMSG_CHAR_CREATE = construct.Struct(
+	'header' / ServerHeader(Opcode.SMSG_CHAR_CREATE),
 )
 
 CMSG_CHAR_ENUM = construct.Struct(
