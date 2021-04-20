@@ -115,8 +115,6 @@ async def test_protocol_packet_fns():
 		(CMSG_WHO, dict(
 			name='Horse',
 			min_level=1, max_level=80,
-			guild_name='', race=0, combat_class=0,
-			zones=[], search_terms=[]
 		)),
 		# (CMSG_WHOIS, dict(
 		#     name='Horsemo'

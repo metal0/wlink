@@ -15,7 +15,7 @@ SMSG_TIME_SYNC_REQ = construct.Struct(
 )
 
 CMSG_QUERY_TIME = construct.Struct(
-	'header' / ClientHeader(Opcode.SMSG_QUERY_TIME_RESPONSE, 0),
+	'header' / ClientHeader(Opcode.CMSG_QUERY_TIME, 0),
 )
 
 SMSG_QUERY_TIME_RESPONSE = construct.Struct(

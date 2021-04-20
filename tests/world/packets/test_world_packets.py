@@ -2,7 +2,8 @@ from wlink.guid import Guid, GuidType
 from wlink.world.packets import SMSG_LOGIN_VERIFY_WORLD, SMSG_LOGOUT_RESPONSE, SMSG_NOTIFICATION, \
 	SMSG_CLIENTCACHE_VERSION, SMSG_TUTORIAL_FLAGS, SMSG_ADDON_INFO, SMSG_CHAR_ENUM, Race, Gender, CombatClass, \
 	CMSG_CHAR_ENUM, CMSG_PLAYER_LOGIN, SMSG_TIME_SYNC_REQ, CMSG_TIME_SYNC_RESP, CMSG_NAME_QUERY, \
-	SMSG_NAME_QUERY_RESPONSE, Opcode, SMSG_INIT_WORLD_STATES, SMSG_BIND_POINT_UPDATE, SMSG_MOTD, SMSG_CRITERIA_UPDATE
+	SMSG_NAME_QUERY_RESPONSE, Opcode, SMSG_INIT_WORLD_STATES, SMSG_BIND_POINT_UPDATE, SMSG_MOTD, SMSG_CRITERIA_UPDATE, \
+	SMSG_QUERY_TIME_RESPONSE
 
 
 def test_SMSG_LOGIN_VERIFY_WORLD():
@@ -163,6 +164,14 @@ def test_CMSG_TIME_SYNC_REQ():
 	assert packet.header.size == 10
 	assert packet.id == 5
 	assert packet.client_ticks == 50133
+
+def test_SMSG_QUERY_TIME_RESPONSE():
+	data = b'\x00\n\xcf\x01\xdbS\x7f`\x85k\x00\x00'
+	packet = SMSG_QUERY_TIME_RESPONSE.parse(data)
+	print(packet)
+
+	assert packet.game_time == 1618957275
+	assert packet.time_until_reset == 27525
 
 def test_CMSG_NAME_QUERY():
 	data = b'\x00\x0cP\x00\x00\x00\x1f\x00\x00\x00\x00\x00\x00\x00'

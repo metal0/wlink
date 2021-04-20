@@ -96,7 +96,3 @@ CMSG_MAIL_TAKE_MONEY = construct.Struct(
 	'mailbox' / GuidConstruct(Guid),
 	'mailbox_id' / construct.Int32ul,
 )
-
-SMSG_MAIL_TAKE_MONEY_RESULT = construct.Struct(
-	'header' / ServerHeader(Opcode.SMSG_MAIL_TAKE_MONEY_RESULT),
-)

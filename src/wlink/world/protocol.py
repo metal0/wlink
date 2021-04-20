@@ -631,6 +631,15 @@ class WorldClientProtocol(WorldProtocol):
 			unknown=0,
 		)
 
+	async def send_CMSG_QUERY_TIME(self):
+		"""
+		Sends an encrypted CMSG_QUERY_TIME packet.
+		:return: None.
+		"""
+		await self._send_encrypted_packet(
+			CMSG_QUERY_TIME,
+		)
+
 	async def send_CMSG_TIME_SYNC_RES(self, id: int, client_ticks: int):
 		"""
 		Sends an encrypted CMSG_TIME_SYNC_RES packet.
