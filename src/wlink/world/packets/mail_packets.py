@@ -18,10 +18,6 @@ CMSG_GET_MAIL_LIST = construct.Struct(
 	'mailbox' / GuidConstruct(Guid),
 )
 
-CMSG_SEND_MAIL = construct.Struct(
-	'header' / ClientHeader(Opcode.CMSG_SEND_MAIL, ),
-)
-
 MailEnchantmentInfo = construct.Struct(
 	'charges' / construct.Int32ul,
 	'duration' / construct.Int32ul,
@@ -72,4 +68,35 @@ SMSG_MAIL_LIST_RESULT = construct.Struct(
 	'header' / ServerHeader(Opcode.SMSG_MAIL_LIST_RESULT),
 	'total_num_mail' / construct.Int32ul,
 	'mail' / construct.PrefixedArray(construct.Byte, MailMessageData)
+)
+
+SMSG_RECEIVED_MAIL = construct.Struct(
+	'header' / ServerHeader(Opcode.SMSG_RECEIVED_MAIL, 4),
+	'unk' / construct.Int
+)
+
+CMSG_SEND_MAIL = construct.Struct(
+	'header' / ClientHeader(Opcode.CMSG_SEND_MAIL),
+	'mailbox' / GuidConstruct(Guid),
+	'receiver' / construct.CString('utf8'),
+	'subject' / construct.CString('utf8'),
+	'body' / construct.CString('utf8'),
+	construct.Padding(8),
+	'items' / construct.PrefixedArray(construct.Int8ul, construct.Struct(
+		construct.Padding(1),
+		'guid' / GuidConstruct(Guid)
+	)),
+	'money' / construct.Int32ul,
+	'cod' / construct.Int32ul,
+	construct.Padding(9),
+)
+
+CMSG_MAIL_TAKE_MONEY = construct.Struct(
+	'header' / ClientHeader(Opcode.CMSG_MAIL_TAKE_MONEY),
+	'mailbox' / GuidConstruct(Guid),
+	'mailbox_id' / construct.Int32ul,
+)
+
+SMSG_MAIL_TAKE_MONEY_RESULT = construct.Struct(
+	'header' / ServerHeader(Opcode.SMSG_MAIL_TAKE_MONEY_RESULT),
 )

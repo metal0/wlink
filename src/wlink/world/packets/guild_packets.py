@@ -132,7 +132,7 @@ SMSG_GUILD_COMMAND_RESULT = construct.Struct(
 
 CMSG_GUILD_INVITE = construct.Struct(
 	'header' / ClientHeader(Opcode.CMSG_GUILD_INVITE, 48),
-	'name' / construct.PaddedString(48, 'ascii'),
+	'name' / construct.PaddedString(48, 'utf8'),
 )
 
 SMSG_GUILD_INVITE = construct.Struct(
@@ -168,7 +168,7 @@ SMSG_GUILD_EVENT = construct.Struct(
 	'header' / ServerHeader(Opcode.SMSG_GUILD_EVENT, 19),
 	'type' / PackEnum(GuildEventType),
 	# TODO: Figure out what this is
-	'parameters' / construct.PrefixedArray(construct.Byte, construct.CString(encoding='ascii')),
+	'parameters' / construct.PrefixedArray(construct.Byte, construct.CString(encoding='utf8')),
 	'guid' / construct.Switch(
 		construct.this.type, {
 			GuildEventType.joined: GuidConstruct(Guid),
@@ -187,8 +187,8 @@ CMSG_GUILD_QUERY = construct.Struct(
 SMSG_GUILD_QUERY_RESPONSE = construct.Struct(
 	'header' / ServerHeader(Opcode.SMSG_GUILD_QUERY_RESPONSE, 8 * 32 + 200),
 	'guild_id' / construct.Int32ul,
-	'name' / construct.CString('ascii'),
-	'ranks' / construct.Array(10, construct.CString('ascii')),
+	'name' / construct.CString('utf8'),
+	'ranks' / construct.Array(10, construct.CString('utf8')),
 	'emblem_style' / construct.Int32ul,
 	'emblem_color' / construct.Int32ul,
 	'border_style' / construct.Int32ul,
@@ -220,7 +220,7 @@ CMSG_GUILD_INFO = construct.Struct(
 
 SMSG_GUILD_INFO = construct.Struct(
 	'header' / ServerHeader(Opcode.SMSG_GUILD_INFO, construct.len_(construct.this.name) + 4 + 4 + 4),
-	'name' / construct.CString('ascii'),
+	'name' / construct.CString('utf8'),
 	'created' / construct.Int32ul,
 	'num_members' / construct.Int32ul,
 	'num_accounts' / construct.Int32ul

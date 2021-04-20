@@ -38,3 +38,8 @@ SMSG_UPDATE_WORLD_STATES = construct.Struct(
 	'field' / construct.Int32ul,
 	'value' / construct.Int32ul
 )
+
+SMSG_CRITERIA_UPDATE = construct.Struct(
+	'header' / ServerHeader(Opcode.SMSG_CRITERIA_UPDATE),
+
+)

@@ -1,4 +1,4 @@
-from wlink.world.packets import CMSG_GET_MAIL_LIST, MailType, SMSG_MAIL_LIST_RESULT
+from wlink.world.packets import CMSG_GET_MAIL_LIST, MailType, SMSG_MAIL_LIST_RESULT, SMSG_RECEIVED_MAIL
 from wlink.guid import Guid
 
 def test_CMSG_GET_MAIL_LIST():
@@ -79,3 +79,10 @@ def test_SMSG_MAIL_LIST_RESULT():
 	assert mail[2].sent_items[0].max_durability == 0
 	assert mail[2].sent_items[0].durability == 0
 	print(packet)
+
+def test_SMSG_RECEIVED_MAIL():
+	data = b'\x00\x06\x85\x02\x00\x00\x00\x00'
+	packet = SMSG_RECEIVED_MAIL.parse(data)
+	print(packet)
+
+	assert packet.unk == 0

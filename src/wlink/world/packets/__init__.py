@@ -13,7 +13,7 @@ from .misc_packets import *
 from .mail_packets import *
 from .name_query import *
 from .ping import *
-from .server_message import *
+from .server_packets import *
 from .time_packets import *
 from .tutorial_flags import *
 from .update_packets import *

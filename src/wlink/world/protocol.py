@@ -205,6 +205,8 @@ class WorldClientProtocol(WorldProtocol):
 		except ValueError as e:
 			if 'is not a valid Opcode' in str(e):
 				raise ProtocolError('Invalid opcode, stream might be out of sync')
+			else:
+				logger.exception(e)
 
 	async def send_CMSG_AUTH_SESSION(self, account_name, client_seed, account_hash, realm_id,
 		build=12340, login_server_id=0, login_server_type=0, region_id=0, battlegroup_id=0, addon_info: bytes = default_addon_bytes):
@@ -308,6 +310,46 @@ class WorldClientProtocol(WorldProtocol):
 			CMSG_KEEP_ALIVE,
 		)
 
+	async def send_CMSG_SEND_MAIL(self, mailbox, receiver: str, subject: str, body: str, items=(), money=0, cod=0):
+		"""
+		Sends a CMSG_SEND_MAIL packet with optional encryption.
+		:return: None.
+		"""
+		if type(mailbox) is int:
+			mailbox = Guid(mailbox)
+
+		data_size = 8
+		data_size += len(receiver) + 1
+		data_size += len(subject) + 1
+		data_size += len(body) + 1
+		data_size += 8
+		data_size += len(items) * (1 + 8) + 1
+		data_size += 4*2
+		data_size += 9
+
+		await self._send_encrypted_packet(
+			CMSG_SEND_MAIL,
+			header=dict(size=4 + data_size),
+			mailbox=mailbox,
+			receiver=receiver,
+			subject=subject, body=body,
+			items=items, money=money, cod=cod
+		)
+
+	async def send_CMSG_MAIL_TAKE_MONEY(self, mailbox, mailbox_id):
+		"""
+		Sends a CMSG_MAIL_TAKE_MONEY packet with optional encryption.
+		:return: None.
+		"""
+		if type(mailbox) is int:
+			mailbox = Guid(mailbox)
+
+		await self._send_encrypted_packet(
+			CMSG_MAIL_TAKE_MONEY,
+			mailbox=mailbox,
+			mailbox_id=mailbox_id
+		)
+
 	async def send_CMSG_GET_MAIL_LIST(self, mailbox):
 		"""
 		Sends a CMSG_GET_MAIL_LIST packet with optional encryption.
@@ -333,8 +375,8 @@ class WorldClientProtocol(WorldProtocol):
 		size += 4 + len(zones) * 4
 		size += 4
 
-		for search in search_terms:
-			size += len(search) + 1
+		for term in search_terms:
+			size += len(term) + 1
 
 		await self._send_encrypted_packet(
 			CMSG_WHO,
@@ -479,6 +521,16 @@ class WorldClientProtocol(WorldProtocol):
 			CMSG_DUEL_ACCEPTED
 		)
 
+	async def send_CMSG_GUILD_INFO(self):
+		"""
+		Sends an encrypted CMSG_GUILD_INFO packet.
+		:return: None.
+		"""
+		await self._send_encrypted_packet(
+			CMSG_GUILD_INFO,
+			header=dict(size=4),
+		)
+
 	async def send_CMSG_GUILD_INFO_TEXT(self, info: str):
 		"""
 		Sends an encrypted CMSG_GUILD_INFO_TEXT packet.
@@ -595,6 +647,13 @@ class WorldClientProtocol(WorldProtocol):
 		:return: a parsed SMSG_GROUP_INVITE packet.
 		"""
 		return await self._receive_encrypted_packet(SMSG_GROUP_INVITE)
+
+	async def receive_SMSG_RECEIVED_MAIL(self):
+		"""
+		Receives an encrypted SMSG_RECEIVED_MAIL packet.
+		:return: None.
+		"""
+		return await self._receive_encrypted_packet(SMSG_RECEIVED_MAIL)
 
 	async def receive_SMSG_ADDON_INFO(self):
 		"""
@@ -737,9 +796,6 @@ class WorldServerProtocol(WorldProtocol):
 				bytes_left -= len(body)
 
 			try:
-				if header.opcode == Opcode.CMSG_AUCTION_SELL_ITEM:
-					print('hey')
-
 				logger.log('PACKETS', f'{data=}')
 				packet = self.parser.parse(data, header)
 				logger.log('PACKETS', f'{packet=}')
@@ -750,11 +806,13 @@ class WorldServerProtocol(WorldProtocol):
 				if type(e) is KeyError:
 					logger.log('PACKETS', f'Dropped packet: {header=}')
 				else:
-					traceback.print_exc()
+					logger.exception(e)
 
 		except ValueError as e:
 			if 'is not a valid Opcode' in str(e):
 				raise ProtocolError('Invalid opcode, stream might be out of sync')
+			else:
+				logger.exception(e)
 
 	async def send_SMSG_AUTH_RESPONSE(self,
           response: AuthResponse, expansion=Expansion.wotlk,
@@ -973,6 +1031,15 @@ class WorldServerProtocol(WorldProtocol):
 		"""
 		return await self._receive_encrypted_packet(
 			CMSG_PING,
+		)
+
+	async def receive_CMSG_SEND_MAIL(self):
+		"""
+		Receives a CMSG_SEND_MAIL packet with optional encryption.
+		:return: a parsed CMSG_SEND_MAIL packet.
+		"""
+		return await self._receive_encrypted_packet(
+			CMSG_SEND_MAIL,
 		)
 
 	async def receive_CMSG_GET_MAIL_LIST(self):

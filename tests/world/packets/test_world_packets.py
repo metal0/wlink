@@ -2,7 +2,7 @@ from wlink.guid import Guid, GuidType
 from wlink.world.packets import SMSG_LOGIN_VERIFY_WORLD, SMSG_LOGOUT_RESPONSE, SMSG_NOTIFICATION, \
 	SMSG_CLIENTCACHE_VERSION, SMSG_TUTORIAL_FLAGS, SMSG_ADDON_INFO, SMSG_CHAR_ENUM, Race, Gender, CombatClass, \
 	CMSG_CHAR_ENUM, CMSG_PLAYER_LOGIN, SMSG_TIME_SYNC_REQ, CMSG_TIME_SYNC_RESP, CMSG_NAME_QUERY, \
-	SMSG_NAME_QUERY_RESPONSE, Opcode, SMSG_INIT_WORLD_STATES, SMSG_BIND_POINT_UPDATE, SMSG_MOTD
+	SMSG_NAME_QUERY_RESPONSE, Opcode, SMSG_INIT_WORLD_STATES, SMSG_BIND_POINT_UPDATE, SMSG_MOTD, SMSG_CRITERIA_UPDATE
 
 
 def test_SMSG_LOGIN_VERIFY_WORLD():
@@ -23,11 +23,6 @@ def test_SMSG_LOGOUT_RESPONSE():
 	assert packet.header.size == 7
 	assert packet.reason == 0
 	assert packet.instant_logout is True
-
-def test_SMSG_NOTIFICATION():
-	data = b'\x00\x13\xcb\x01Unknown language\x00'
-	packet = SMSG_NOTIFICATION.parse(data)
-	assert packet.message == "Unknown language"
 
 def test_SMSG_CLIENTCACHE_VERSION():
 	data = bytes.fromhex('0006AB0403000000')
@@ -211,12 +206,8 @@ def test_SMSG_BIND_POINT_UPDATE():
 	assert packet.map_id == 0
 	assert packet.area_id == 12
 
-def test_SMSG_MOTD():
-	data = b'\x00t=\x03\x02\x00\x00\x00Welcome to an AzerothCore server.\x00|cffFF4A2DThis server runs on AzerothCore|r |cff3CE7FFwww.azerothcore.org|r\x00'
-	packet = SMSG_MOTD.parse(data)
 
-	assert packet.header.size == 116
-	assert packet.lines == [
-		'Welcome to an AzerothCore server.',
-		'|cffFF4A2DThis server runs on AzerothCore|r |cff3CE7FFwww.azerothcore.org|r'
-	]
+def test_SMSG_CRITERIA_UPDATE():
+	data = b'\x00\x1aj\x04\x1e\r\x00\x00\x01\xd2\x010\x00\x00\x00\x00\xb7\xd44\x15\x00\x00\x00\x00\x00\x00\x00\x00'
+	packet = SMSG_CRITERIA_UPDATE.parse(data)
+	print(packet)
