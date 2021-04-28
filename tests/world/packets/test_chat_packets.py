@@ -15,6 +15,19 @@ def test_CMSG_MESSAGECHAT():
 	assert packet.receiver is None
 	assert packet.text == 'bongour, brother'
 
+	# SMSG_CHANNEL_NOTIFY:
+	# data = b'\x00*\x99\x00\x02LocalDefense - Stormwind City\x00\x18\x16\x00\x00\x00\x00\x00\x00\x00'
+	# data=b'\x00\x19\x99\x00\x02WorldDefense\x00\x18\x17\x00\x00\x00\x00\x00\x00\x00'
+
+# 2021-04-20 19:39:38.467 | PACKETS  | wlink.world.protocol:next_decrypted_packet:182 - header=Container(size=38, opcode=<Opcode.MSG_MOVE_TELEPORT_ACK: 199>)
+# 2021-04-20 19:39:38.467 | PACKETS  | wlink.world.protocol:next_decrypted_packet:187 - Listening for 36 byte body...
+# 2021-04-20 19:39:38.467 | PACKETS  | wlink.world.protocol:next_decrypted_packet:189 - len(leftover_bytes)=36
+# 2021-04-20 19:39:38.468 | PACKETS  | wlink.world.protocol:next_decrypted_packet:197 - data=b'\x00&\xc7\x00\x010\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xe9\xbc\xb5%T\x81\x00\xc6\x9b;\xb2DLE\x16A\xcee\xb7?\x00\x00\x00\x00'
+
+# 2021-04-20 21:24:50.233 | PACKETS  | wlink.world.protocol:next_decrypted_packet:182 - header=Container(size=11, opcode=<Opcode.SMSG_WEATHER: 756>)
+# 2021-04-20 21:24:50.233 | PACKETS  | wlink.world.protocol:next_decrypted_packet:200 - fragmentation: 1
+# 2021-04-20 21:24:50.233 | PACKETS  | wlink.world.protocol:next_decrypted_packet:201 - data=b'\x00\x0b\xf4\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+
 def test_SMSG_MESSAGECHAT():
 	data = b'\x003\x96\x00\x0c\x00\x00\x00\x00k7\x01\xbe\r\x000\xf1\x00\x00\x00\x00\x0e\x00\x00\x00Thomas Miller\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00'
 	packet = SMSG_MESSAGECHAT.parse(data)

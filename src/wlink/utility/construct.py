@@ -191,6 +191,7 @@ class PackedDateTime(construct.Adapter):
 		result |= obj.weekday() << 11
 		result |= obj.hour << 6
 		result |= obj.minute
+		print(result)
 		return result
 		# return ((obj.year - 100) << 24) | (obj.month << 20) | ((obj.day - 1) << 14)  | (obj.weekday() << 11) | (obj.hour << 6) | obj.minute
 

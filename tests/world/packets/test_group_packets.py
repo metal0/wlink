@@ -1,4 +1,5 @@
-from wlink.world.packets import SMSG_GROUP_INVITE, Opcode, SMSG_GROUP_LIST
+from wlink import Guid
+from wlink.world.packets import SMSG_GROUP_INVITE, Opcode, SMSG_GROUP_LIST, GroupType
 
 
 def test_group_invite():
@@ -14,3 +15,21 @@ def test_group_list():
 	data = b'\x00>}\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00P\x1fC\x00\x00\x00\x01\x00\x00\x00Imbued\x00\x06\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x06\x00\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00'
 	packet = SMSG_GROUP_LIST.parse(data)
 	print(packet)
+
+	assert packet.type == GroupType.normal
+	assert packet.group == 0
+	assert packet.flags == 0
+	assert packet.roles == 0
+	assert packet.guid == Guid(value=0x1f50000000000001)
+	assert packet.total_num_groups == 67
+	assert packet.size == 1
+
+	imbued = packet.members[0]
+	assert imbued.name == 'Imbued'
+	assert imbued.guid == Guid(value=0x6)
+	assert imbued.online == False
+	assert imbued.group_id == 0
+	assert imbued.flags == 0
+	assert imbued.roles == 0
+
+	assert packet.leader_guid == Guid(value=0x6)

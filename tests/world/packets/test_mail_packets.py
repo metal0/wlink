@@ -1,5 +1,8 @@
-from wlink.world.packets import CMSG_GET_MAIL_LIST, MailType, SMSG_MAIL_LIST_RESULT, SMSG_RECEIVED_MAIL
+from wlink.world.packets import CMSG_GET_MAIL_LIST, MailType, SMSG_MAIL_LIST_RESULT, SMSG_RECEIVED_MAIL, \
+	SMSG_SEND_MAIL_RESULT, MailResponseType, MailResponse
 from wlink.guid import Guid
+from wlink.world.packets.parse import WorldServerPacketParser
+
 
 def test_CMSG_GET_MAIL_LIST():
 	# header=Container(size=0, opcode= <Opcode.CMSG_GET_MAIL_LIST: 570>), mailbox = 215099663085715459)
@@ -86,3 +89,12 @@ def test_SMSG_RECEIVED_MAIL():
 	print(packet)
 
 	assert packet.unk == 0
+
+def test_SMSG_SEND_MAIL_RESULT():
+	data = b'\x00\x0e9\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+	packet = SMSG_SEND_MAIL_RESULT.parse(data)
+	print(packet)
+
+	assert packet.mail_id == 0
+	assert packet.mail_action == MailResponseType.send
+	assert packet.mail_response == MailResponse.ok

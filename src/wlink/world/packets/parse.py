@@ -18,9 +18,9 @@ from .guild_packets import SMSG_GUILD_QUERY_RESPONSE, SMSG_GUILD_ROSTER, SMSG_GU
 	SMSG_GUILD_INFO
 from .headers import ServerHeader
 from .login_packets import SMSG_LOGOUT_RESPONSE, SMSG_LOGOUT_CANCEL_ACK, SMSG_LOGOUT_COMPLETE, SMSG_LOGIN_VERIFY_WORLD
-from .mail_packets import CMSG_GET_MAIL_LIST, SMSG_MAIL_LIST_RESULT, CMSG_SEND_MAIL
+from .mail_packets import CMSG_GET_MAIL_LIST, SMSG_MAIL_LIST_RESULT, CMSG_SEND_MAIL, SMSG_SEND_MAIL_RESULT
 from .misc_packets import SMSG_CLIENTCACHE_VERSION, SMSG_INIT_WORLD_STATES, SMSG_ADDON_INFO
-from .name_query import SMSG_NAME_QUERY_RESPONSE
+from .query_packets import SMSG_NAME_QUERY_RESPONSE
 from .ping import SMSG_PONG, CMSG_PING
 from .server_packets import SMSG_SERVER_MESSAGE, SMSG_NOTIFICATION, SMSG_MOTD
 from .time_packets import SMSG_TIME_SYNC_REQ, SMSG_QUERY_TIME_RESPONSE
@@ -28,6 +28,7 @@ from .tutorial_flags import SMSG_TUTORIAL_FLAGS
 from .update_packets import SMSG_COMPRESSED_UPDATE_OBJECT, SMSG_UPDATE_OBJECT
 from .warden_packets import SMSG_WARDEN_DATA
 from wlink.world.opcode import Opcode
+from .world_packets import SMSG_TRANSFER_PENDING, SMSG_NEW_WORLD, SMSG_CANCEL_COMBAT
 
 
 class WorldPacketParser:
@@ -48,7 +49,6 @@ class WorldPacketParser:
 
 class WorldServerPacketParser(WorldPacketParser):
 	def __init__(self):
-		super().__init__()
 		parsers = [
 			(Opcode.SMSG_ADDON_INFO, SMSG_ADDON_INFO),
 			(Opcode.SMSG_AUCTION_LIST_RESULT, SMSG_AUCTION_LIST_RESULT),
@@ -90,9 +90,14 @@ class WorldServerPacketParser(WorldPacketParser):
 			(Opcode.SMSG_UPDATE_OBJECT, SMSG_UPDATE_OBJECT),
 			(Opcode.SMSG_COMPRESSED_UPDATE_OBJECT, SMSG_COMPRESSED_UPDATE_OBJECT),
 			(Opcode.SMSG_MAIL_LIST_RESULT, SMSG_MAIL_LIST_RESULT),
+			(Opcode.SMSG_SEND_MAIL_RESULT, SMSG_SEND_MAIL_RESULT),
 			(Opcode.SMSG_WHOIS, SMSG_WHOIS),
 			(Opcode.SMSG_WHO, SMSG_WHO),
+			(Opcode.SMSG_TRANSFER_PENDING, SMSG_TRANSFER_PENDING),
+			(Opcode.SMSG_NEW_WORLD, SMSG_NEW_WORLD),
+			(Opcode.SMSG_CANCEL_COMBAT, SMSG_CANCEL_COMBAT)
 		]
+		super().__init__()
 
 		for opcode, parser in parsers:
 			self.set_parser(opcode, parser)

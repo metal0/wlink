@@ -11,7 +11,7 @@ from .keep_alive import *
 from .login_packets import *
 from .misc_packets import *
 from .mail_packets import *
-from .name_query import *
+from .query_packets import *
 from .ping import *
 from .server_packets import *
 from .time_packets import *

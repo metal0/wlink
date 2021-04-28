@@ -4,6 +4,8 @@ from wlink.world.packets import SMSG_LOGIN_VERIFY_WORLD, SMSG_LOGOUT_RESPONSE, S
 	CMSG_CHAR_ENUM, CMSG_PLAYER_LOGIN, SMSG_TIME_SYNC_REQ, CMSG_TIME_SYNC_RESP, CMSG_NAME_QUERY, \
 	SMSG_NAME_QUERY_RESPONSE, Opcode, SMSG_INIT_WORLD_STATES, SMSG_BIND_POINT_UPDATE, SMSG_MOTD, SMSG_CRITERIA_UPDATE, \
 	SMSG_QUERY_TIME_RESPONSE
+from wlink.world.packets.world_packets import SMSG_CANCEL_COMBAT, SMSG_TRANSFER_PENDING, SMSG_NEW_WORLD, SMSG_WEATHER, \
+	WeatherType
 
 
 def test_SMSG_LOGIN_VERIFY_WORLD():
@@ -192,6 +194,53 @@ def test_SMSG_NAME_QUERY():
 	assert packet.info.realm_name == ''
 	assert packet.info.race == Race.human
 	assert packet.info.gender == Gender.female
+
+def test_SMSG_CANCEL_COMBAT():
+	data = b'\x00\x02N\x01'
+	packet = SMSG_CANCEL_COMBAT.parse(data)
+	print(packet)
+
+def test_SMSG_TRANSFER_PENDING():
+	data = b'\x00\x06?\x00\x00\x00\x00\x00'
+	packet = SMSG_TRANSFER_PENDING.parse(data)
+	print(packet)
+
+	assert packet.map_id == 0
+
+	data = b'\x00\x06?\x00;\x02\x00\x00'
+	packet = SMSG_TRANSFER_PENDING.parse(data)
+	print(packet)
+
+	assert packet.map_id == 571
+
+def test_SMSG_NEW_WORLD():
+	data = b'\x00\x16>\x00\x00\x00\x00\x00\x07\xb5\t\xc6@\xd8#D\xc7\xce\xbdB\xcee\xb7?'
+	packet = SMSG_NEW_WORLD.parse(data)
+	print(packet)
+
+	assert packet.map_id == 0
+	assert packet.position.x == -8813.2568359375
+	assert packet.position.y == 655.37890625
+	assert packet.position.z == 94.90386199951172
+	assert packet.rotation == 1.4327943325042725
+
+	data = b'\x00\x16>\x00;\x02\x00\x00\\\x97\nE\xf6\r\xa0E\xfe\xeb\x15A\xcee\xb7?'
+	packet = SMSG_NEW_WORLD.parse(data)
+	print(packet)
+
+	assert packet.map_id == 571
+	assert packet.position.x == 2217.4599609375
+	assert packet.position.y == 5121.7451171875
+	assert packet.position.z == 9.370115280151367
+	assert packet.rotation == 1.4327943325042725
+
+def test_SMSG_WEATHER():
+	data = b'\x00\x0b\xf4\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+	packet = SMSG_WEATHER.parse(data)
+	print(packet)
+
+	assert packet.weather == WeatherType.nice
+	assert packet.grade == 0.0
 
 def test_SMSG_INIT_WORLD_STATES():
 	data = bytes.fromhex('0050C20200000000EF050000EF0500000800D808000000000000D708000000000000D608000000000000D508000000000000D408000000000000D308000000000000770C0000010000003D0F000008000000')

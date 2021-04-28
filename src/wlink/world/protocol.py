@@ -25,6 +25,7 @@ class WorldProtocol:
 		self._encrypter, self._decrypter = None, None
 		self._num_packets_received = 0
 		self._num_packets_sent = 0
+		self._average_fragmentation = 0
 
 		self._init_encryption(session_key)
 
@@ -177,24 +178,28 @@ class WorldClientProtocol(WorldProtocol):
 			if is_large:
 				header_data += self.decrypt(await self.receive_some(max_bytes=1))
 
-			logger.log('PACKETS', f'{header_data=}')
 			header = ServerHeader().parse(header_data)
 			logger.log('PACKETS', f'{header=}')
 			data = header_data
 
+			fragmentation_count = 0
 			bytes_left = header.size - 2
 			while bytes_left > 0:
-				logger.log('PACKETS', f'Listening for {bytes_left} byte body...')
 				leftover_bytes = await self.receive_some(max_bytes=bytes_left)
-				logger.log('PACKETS', f'{len(leftover_bytes)=}')
 
+				fragmentation_count += 1
 				data += leftover_bytes
 				bytes_left -= len(leftover_bytes)
 				if leftover_bytes is None or len(leftover_bytes) == 0:
 					raise ProtocolError('received EOF from server')
 
 			try:
+				self._average_fragmentation += fragmentation_count
+				self._average_fragmentation /= 2
+
+				logger.log('PACKETS', f'fragmentation: {self._average_fragmentation}')
 				logger.log('PACKETS', f'{data=}')
+
 				packet = self.parser.parse(data, header)
 				self._num_packets_received += 1
 				return packet
