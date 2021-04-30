@@ -7,7 +7,6 @@ import os
 
 from wlink.log import logger, configure_log
 
-configure_log(logger, packets_level=5)
 
 from wlink.guid import Guid
 from wlink.world import WorldClientProtocol, WorldServerProtocol
