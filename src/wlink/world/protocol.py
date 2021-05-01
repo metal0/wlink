@@ -368,6 +368,17 @@ class WorldClientProtocol(WorldProtocol):
 			mailbox=mailbox
 		)
 
+	async def send_CMSG_WARDEN_DATA(self, encrypted: bytes):
+		"""
+		Sends an encrypted CMSG_QUERY_TIME packet.
+		:return: None.
+		"""
+		await self._send_encrypted_packet(
+			CMSG_WARDEN_DATA,
+			header=dict(size=4 + len(encrypted)),
+			encrypted=encrypted
+		)
+
 	async def send_CMSG_WHO(self, name: str='', guild_name: str='', race=None, combat_class=None,
 		min_level=1, max_level=80, zones=(), search_terms=()):
 		"""
@@ -871,6 +882,25 @@ class WorldServerProtocol(WorldProtocol):
 			server_seed=server_seed,
 			encryption_seed1=encryption_seed1,
 			encryption_seed2=encryption_seed2
+		)
+
+	async def send_SMSG_MOTD(self, lines):
+		"""
+		Sends an encrypted SMSG_MOTD packet.
+		:param lines:
+		:return: None.
+		"""
+		if type(lines) is str:
+			lines = (lines, )
+
+		size = 2 + 4
+		for line in lines:
+			size += len(line) + 1
+
+		await self._send_unencrypted_packet(
+			SMSG_MOTD,
+			header=dict(size=size),
+			lines=lines
 		)
 
 	async def send_SMSG_NAME_QUERY_RESPONSE(self, guid, found: bool, info):

@@ -1,14 +1,9 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
 	name='wlink',
 	version='0.0.2',
-	packages=[
-		'wlink',
-		'wlink.cryptography', 'wlink.utility',
-		'wlink.auth', 'wlink.world',
-		'wlink.auth.packets', 'wlink.world.packets'
-	],
+	packages=find_packages('src/'),
 
 	package_dir={'': 'src'},
 	url='https://github.com/ostoic/wlink',
