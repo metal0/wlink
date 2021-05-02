@@ -56,12 +56,12 @@ def test_challenge_response_packet1():
 	packet = bytes.fromhex('0000006f168b46a9cd26b0adb481c59d92ba2f8e5432918abb90f0805677cc085d6a07010720b79b3e2a87823cab8f5ebfbf8eb10108535006298b5badbd5b53e1895e644b89fb348ce3fd604ea01f910e12b900588375197e0172df0ae9df5fac2e22227ea6c5a970407fe7d52276c97e13e71695d300')
 	challenge_response = ChallengeResponse.parse(packet)
 	assert challenge_response.header.response == Response.success
-	assert challenge_response.server_public == 3354117828571998584191894319144934700250845415608995089404241538219888023151
-	assert challenge_response.generator_length == 1
-	assert challenge_response.generator == 7
-	assert challenge_response.prime_length == 32
-	assert challenge_response.prime == 62100066509156017342069496140902949863249758336000796928566441170293728648119
-	assert challenge_response.salt == 75306791175913550635130350707151637678476193135459206924908206791041802319099
+	assert challenge_response.rc4.server_public == 3354117828571998584191894319144934700250845415608995089404241538219888023151
+	assert challenge_response.rc4.generator_length == 1
+	assert challenge_response.rc4.generator == 7
+	assert challenge_response.rc4.prime_length == 32
+	assert challenge_response.rc4.prime == 62100066509156017342069496140902949863249758336000796928566441170293728648119
+	assert challenge_response.rc4.salt == 75306791175913550635130350707151637678476193135459206924908206791041802319099
 	assert ChallengeResponse.build(challenge_response) == packet
 
 	szn_data = bytes.fromhex('000000675f54d1e65a382bc343730cac11dcaa4c0204a1a45a3e87c4b31bed6933eb55010720b79b3e2a87823cab8f5ebfbf8eb10108535006298b5badbd5b53e1895e644b8979604517f018fa18b3b99bb764cbcb33bed1e3db2ccc17bac1a2cb062e86cdd40166742b495c252c46876a1a3e7d18e200')
@@ -70,41 +70,51 @@ def test_challenge_response_packet1():
 	warmane_bug_data = bytes.fromhex('000000153ce50a2a341987445c88a85e650599a684a84b7f43c5c57921bd183f1db105010720b79b3e2a87823cab8f5ebfbf8eb10108535006298b5badbd5b53e1895e644b89ed5be899b7acc1a3514d8c93d997329fd6756f744b1be29c0a51a2c995b7cae5baa31e99a00b2157fc373fb369cdd2f100')
 	print(ChallengeResponse.parse(warmane_bug_data))
 
+	acore_banned_data = bytearray(b'\x00\x00\x0c')
+	response = ChallengeResponse.parse(acore_banned_data)
+
+	assert response.header.opcode == Opcode.login_challenge
+	assert response.response == Response.suspended
+	assert response.rc4 is None
+
+
 def test_challenge_response_packet2():
 	packet = bytes.fromhex('0000009ef68afffcd1328866b564d4bb0b12249a8df90e07bcd6064845ab64b482e11c010720b79b3e2a87823cab8f5ebfbf8eb10108535006298b5badbd5b53e1895e644b89319782ba4be5e9fc8e11cf9d7261f450ee7344aee4e402f6a3d0319c7ac425eabaa31e99a00b2157fc373fb369cdd2f100')
-
 	challenge_response = ChallengeResponse.parse(packet)
+	print(challenge_response)
+
 	assert challenge_response.header.opcode == Opcode.login_challenge
 	assert challenge_response.header.response == Response.success
-	assert challenge_response.server_public == int.from_bytes(packet[3:35], byteorder='little', signed=False)
-	assert challenge_response.generator_length == 1
-	assert challenge_response.generator == 7
-	assert challenge_response.prime_length == 32
-	assert challenge_response.prime == 62100066509156017342069496140902949863249758336000796928566441170293728648119
-	assert challenge_response.salt == int.from_bytes(packet[70:102], 'little', signed=False)
+	assert challenge_response.rc4.server_public == int.from_bytes(packet[3:35], byteorder='little', signed=False)
+	assert challenge_response.rc4.generator_length == 1
+	assert challenge_response.rc4.generator == 7
+	assert challenge_response.rc4.prime_length == 32
+	assert challenge_response.rc4.prime == 62100066509156017342069496140902949863249758336000796928566441170293728648119
+	assert challenge_response.rc4.salt == int.from_bytes(packet[70:102], 'little', signed=False)
 	assert ChallengeResponse.build(challenge_response) == packet
 
 def test_challenge_response_named_args():
-	packet = ChallengeResponse.build({
-		'server_public': 37573892888418226681312157480058717812018111076215085243857638337566340538151,
-		'gen_len': 1,
-		'generator': 7,
-		'prime_len': 32,
-		'prime': 62100066509156017342069496140902949863249758336000796928566441170293728648119,
-		'salt': 105907935957727809645867901940389592363084317324947500788246621423699503519537,
-		'checksum': 0,
-		'security_flag': 0,
-	})
+	packet = ChallengeResponse.build(dict(
+		rc4=dict(
+			server_public=37573892888418226681312157480058717812018111076215085243857638337566340538151,
+			gen_len=1,
+			generator=7,
+			prime_len=32,
+			prime=62100066509156017342069496140902949863249758336000796928566441170293728648119,
+			salt=105907935957727809645867901940389592363084317324947500788246621423699503519537,
+			checksum=0,
+			security_flag=0,
+	)))
 
 	challenge_response = ChallengeResponse.parse(packet)
 	assert challenge_response.header.opcode == Opcode.login_challenge
-	assert challenge_response.header.response == Response.success
-	assert challenge_response.server_public == 37573892888418226681312157480058717812018111076215085243857638337566340538151
-	assert challenge_response.generator_length == 1
-	assert challenge_response.generator == 7
-	assert challenge_response.prime_length == 32
-	assert challenge_response.prime == 62100066509156017342069496140902949863249758336000796928566441170293728648119
-	assert challenge_response.salt == 105907935957727809645867901940389592363084317324947500788246621423699503519537
+	assert challenge_response.response == Response.success
+	assert challenge_response.rc4.server_public == 37573892888418226681312157480058717812018111076215085243857638337566340538151
+	assert challenge_response.rc4.generator_length == 1
+	assert challenge_response.rc4.generator == 7
+	assert challenge_response.rc4.prime_length == 32
+	assert challenge_response.rc4.prime == 62100066509156017342069496140902949863249758336000796928566441170293728648119
+	assert challenge_response.rc4.salt == 105907935957727809645867901940389592363084317324947500788246621423699503519537
 
 	assert ChallengeResponse.build(challenge_response) == packet
 
