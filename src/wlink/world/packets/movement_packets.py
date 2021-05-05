@@ -1,7 +1,7 @@
 import construct
 
 from wlink import Guid
-from wlink.utility.construct import GuidUnpacker
+from wlink.utility.construct import PackGuid
 from wlink.world import Opcode
 from wlink.world.packets import ServerHeader
 
@@ -9,7 +9,7 @@ from wlink.world.packets import ServerHeader
 def MSG_MOVE_TELEPORT_ACK(header_type):
     return construct.Struct(
         'header' / header_type,
-        'mover_guid' / GuidUnpacker(Guid),
+        'mover_guid' / PackGuid(Guid),
         'flags' / construct.Int32ul,
         'time' / construct.Int32ul
     )

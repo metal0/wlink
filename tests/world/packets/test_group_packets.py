@@ -16,7 +16,7 @@ def test_group_list():
 	packet = SMSG_GROUP_LIST.parse(data)
 	print(packet)
 
-	assert packet.type == GroupType.normal
+	assert packet.type.party
 	assert packet.group == 0
 	assert packet.flags == 0
 	assert packet.roles == 0
@@ -33,3 +33,22 @@ def test_group_list():
 	assert imbued.roles == 0
 
 	assert packet.leader_guid == Guid(value=0x6)
+
+
+	data = b'\x00\x1e}\x00\x00\x00\x00\x00\x06\x00\x00\x00\x00\x00P\x1f\x00\x00\x00\x00\x00\x00\x00\x000\x00\x00\x00\x00\x00\x00\x00'
+	packet = SMSG_GROUP_LIST.parse(data)
+	print(packet)
+
+	assert packet.type.party
+	assert packet.guid == Guid(value=0x1f50000000000006)
+	assert packet.members == []
+	assert packet.leader_guid == Guid(value=0x30)
+
+	data = b'\x00\x1e}\x00\x10\x00\x00\x00\x07\x00\x00\x00\x00\x00P\x1f\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+	packet = SMSG_GROUP_LIST.parse(data)
+	print(packet)
+
+	assert packet.guid == Guid(value=0x1f50000000000007)
+	assert packet.members == []
+	assert packet.type.party
+	assert packet.size == 0

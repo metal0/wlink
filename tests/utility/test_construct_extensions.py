@@ -3,7 +3,7 @@ import datetime
 import construct
 from wlink import Guid
 from wlink.guid import GuidType
-from wlink.utility.construct import AddressPort, unpack_guid, GuidUnpacker, pack_guid, PackedDateTime, \
+from wlink.utility.construct import AddressPort, unpack_guid, PackGuid, pack_guid, PackedDateTime, \
 	PackedCoordinates, NamedConstruct
 from wlink.world.packets import CombatClass, Race, Gender
 
@@ -34,8 +34,8 @@ def test_packed_guid():
 	guid = Guid(value=0x7000000003372cc)
 	assert unpack_guid(*pack_guid(guid.value)) == guid.value
 
-	packed_guid = GuidUnpacker(Guid).build(guid)
-	parsed_guid = GuidUnpacker(Guid).parse(packed_guid)
+	packed_guid = PackGuid(Guid).build(guid)
+	parsed_guid = PackGuid(Guid).parse(packed_guid)
 	assert parsed_guid == guid
 
 	guid = Guid(counter=3, high=7)

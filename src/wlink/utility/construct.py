@@ -249,7 +249,7 @@ def unpack_guid(mask: int, data: bytes) -> int:
 
 	return guid
 
-class GuidUnpacker(construct.Adapter):
+class PackGuid(construct.Adapter):
 	def __init__(self, guid_type):
 		super().__init__(construct.Struct(
 			"mask" / construct.Byte,

@@ -74,7 +74,12 @@ SMSG_MAIL_LIST_RESULT = construct.Struct(
 
 SMSG_RECEIVED_MAIL = construct.Struct(
     'header' / ServerHeader(Opcode.SMSG_RECEIVED_MAIL, 4),
-    'unk' / construct.Int
+    'unk' / construct.Float32l # According to IDA this is a float
+)
+
+SMSG_SHOW_MAILBOX = construct.Struct(
+    'header' / ServerHeader(Opcode.SMSG_SHOW_MAILBOX),
+    'guid' / GuidConstruct(Guid),
 )
 
 CMSG_SEND_MAIL = construct.Struct(

@@ -1,6 +1,6 @@
 import construct
 
-from wlink.utility.construct import GuidConstruct, GuidUnpacker, PackEnum
+from wlink.utility.construct import GuidConstruct, PackGuid, PackEnum
 from . import CombatClass, Gender, Race
 from .headers import ServerHeader, ClientHeader
 from wlink.world.opcode import Opcode
@@ -32,7 +32,7 @@ class NegatedFlag(construct.Adapter):
 
 SMSG_NAME_QUERY_RESPONSE = construct.Struct(
 	'header' / ServerHeader(Opcode.SMSG_NAME_QUERY_RESPONSE, 8+1+1+1+1+1+10),
-	'guid' / GuidUnpacker(Guid),
+	'guid' / PackGuid(Guid),
 	'found' / NegatedFlag(),
 	'info' / construct.If(construct.this.found, NameInfo)
 )

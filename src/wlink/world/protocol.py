@@ -626,14 +626,56 @@ class WorldClientProtocol(WorldProtocol):
 			CMSG_LOGOUT_CANCEL
 		)
 
+	async def send_CMSG_GROUP_UNINVITE(self, member: str):
+		"""
+		Sends an encrypted CMSG_GROUP_UNINVITE packet.
+		:return: None.
+		"""
+		await self._send_encrypted_packet(
+			CMSG_GROUP_UNINVITE,
+			header=dict(size=4 + len(member) + 1 + 4),
+			member=member
+		)
+
+	async def send_CMSG_GROUP_UNINVITE_GUID(self, member: str, reason: str):
+		"""
+		Sends an encrypted CMSG_GROUP_UNINVITE_GUID packet.
+		:return: None.
+		"""
+		await self._send_encrypted_packet(
+			CMSG_GROUP_UNINVITE_GUID,
+			header=dict(size=4 + len(reason) + 1 + GuidConstruct(Guid).sizeof()),
+			guid=member, reason=reason
+		)
+
+	async def send_CMSG_GROUP_DISBAND(self):
+		"""
+		Sends an encrypted CMSG_GROUP_DISBAND packet. When the player is not group leader this is a request to leave
+		the player's current group. When the player is group leader, it disbands the group.
+		:return: None.
+		"""
+		await self._send_encrypted_packet(CMSG_GROUP_DISBAND)
+
+	async def send_CMSG_GROUP_CANCEL(self):
+		"""
+		Sends an encrypted CMSG_GROUP_CANCEL packet.
+		:return: None.
+		"""
+		await self._send_encrypted_packet(CMSG_GROUP_CANCEL)
+
+	async def send_CMSG_GROUP_DECLINE(self):
+		"""
+		Sends an encrypted CMSG_GROUP_DECLINE packet.
+		:return: None.
+		"""
+		await self._send_encrypted_packet(CMSG_GROUP_DECLINE)
+
 	async def send_CMSG_GROUP_ACCEPT(self):
 		"""
 		Sends an encrypted CMSG_GROUP_ACCEPT packet.
 		:return: None.
 		"""
-		await self._send_encrypted_packet(
-			CMSG_GROUP_ACCEPT
-		)
+		await self._send_encrypted_packet(CMSG_GROUP_ACCEPT)
 
 	async def send_CMSG_GROUP_INVITE(self, invitee: str):
 		"""
@@ -642,9 +684,8 @@ class WorldClientProtocol(WorldProtocol):
 		"""
 		await self._send_encrypted_packet(
 			CMSG_GROUP_INVITE,
-			header={'size': len(invitee) + 4},
+			header=dict(size=4 + len(invitee) + 1 + 4),
 			invitee=invitee,
-			unknown=0,
 		)
 
 	async def send_CMSG_QUERY_TIME(self):

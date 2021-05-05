@@ -2,9 +2,10 @@ from enum import Enum
 
 import construct
 
-from wlink.utility.construct import Coordinates, PackEnum
+from wlink.guid import Guid
+from wlink.utility.construct import Coordinates, PackEnum, GuidConstruct
 from wlink.world import Opcode
-from wlink.world.packets import ServerHeader
+from wlink.world.packets import ServerHeader, ClientHeader
 
 SMSG_CANCEL_COMBAT = construct.Struct(
     'header' / ServerHeader(Opcode.SMSG_CANCEL_COMBAT),
@@ -21,11 +22,71 @@ SMSG_TRANSFER_PENDING = construct.Struct(
     'transport' / construct.Optional(TransferTransportInfo)
 )
 
+class TransferAbortedReason(Enum):
+    error = 1
+    max_players = 2
+    not_found = 3
+    not_found2 = 0xC
+    not_found3 = 0xD
+    not_found4 = 0xE
+
+    too_many_instances = 4
+    zone_in_combat = 6
+    insufficient_expansion = 7
+    difficulty = 8
+    unique_message = 9
+    too_many_realm_instances = 0xA
+    need_group = 0xB
+    realm_only = 0xF
+    map_not_allowed = 0x10
+
+SMSG_TRANSFER_ABORTED = construct.Struct(
+    'header' / ServerHeader(Opcode.SMSG_TRANSFER_ABORTED),
+    'map_id' / construct.Int32ul,
+    'reason' / PackEnum(TransferAbortedReason),
+    'id' / construct.If(
+        construct.this.reason in (
+            TransferAbortedReason.insufficient_expansion, TransferAbortedReason.difficulty,
+            TransferAbortedReason.unique_message
+        ), construct.Int32ul
+    ),
+)
+
 SMSG_NEW_WORLD = construct.Struct(
     'header' / ServerHeader(Opcode.SMSG_NEW_WORLD),
     'map_id' / construct.Int32ul,
     'position' / Coordinates(construct.Float32l),
     'rotation' / construct.Float32l,
+)
+
+SMSG_PLAY_SOUND = construct.Struct(
+    'header' / ServerHeader(Opcode.SMSG_PLAY_SOUND),
+    'sound_id' / construct.Int32ul
+)
+
+CMSG_BATTLEMASTER_HELLO = construct.Struct(
+    'header' / ClientHeader(Opcode.CMSG_BATTLEMASTER_HELLO, 8),
+    'guid' / GuidConstruct(Guid),
+)
+
+CMSG_BANKER_ACTIVATE = construct.Struct(
+    'header' / ClientHeader(Opcode.CMSG_BANKER_ACTIVATE, 8),
+    'guid' / GuidConstruct(Guid),
+)
+
+CMSG_GUILD_BANKER_ACTIVATE = construct.Struct(
+    'header' / ClientHeader(Opcode.CMSG_BANKER_ACTIVATE, 8),
+    'guid' / GuidConstruct(Guid),
+)
+
+CMSG_AREA_SPIRIT_HEALER_QUERY = construct.Struct(
+    'header' / ClientHeader(Opcode.CMSG_BANKER_ACTIVATE, 8),
+    'guid' / GuidConstruct(Guid),
+)
+
+CMSG_SPIRIT_HEALER_ACTIVATE = construct.Struct(
+    'header' / ClientHeader(Opcode.CMSG_BANKER_ACTIVATE, 8),
+    'guid' / GuidConstruct(Guid),
 )
 
 class WeatherType(Enum):
@@ -94,4 +155,10 @@ SMSG_WEATHER = construct.Struct(
     'weather' / PackEnum(WeatherType, construct.Int32ul),
     'grade' / construct.Float32l,
     construct.Padding(1)
+)
+
+SMSG_HEALTH_UPDATE = construct.Struct(
+    'header' / ServerHeader(Opcode.SMSG_HEALTH_UPDATE),
+    'guid' / GuidConstruct(Guid),
+    'health' / construct.Int32ul
 )
