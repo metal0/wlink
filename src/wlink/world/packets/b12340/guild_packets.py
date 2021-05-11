@@ -3,9 +3,9 @@ from enum import Enum
 import construct
 
 from wlink.utility.construct import GuidConstruct, PackEnum
-from . import Gender, CombatClass
+from wlink.world.packets.b12340.character_enum_packets import Gender, CombatClass
 from .headers import ServerHeader, ClientHeader
-from wlink.world.opcode import Opcode
+from .opcode import Opcode
 from wlink.guid import Guid
 
 
@@ -137,8 +137,8 @@ CMSG_GUILD_INVITE = construct.Struct(
 
 SMSG_GUILD_INVITE = construct.Struct(
 	'header' / ServerHeader(Opcode.SMSG_GUILD_INVITE, 10),
-	'inviter' / construct.CString('ascii'),
-	'guild' / construct.CString('ascii')
+	'inviter' / construct.CString('utf8'),
+	'guild' / construct.CString('utf8')
 )
 
 class GuildEventType(Enum):

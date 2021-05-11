@@ -1,8 +1,8 @@
 import construct
 from enum import Enum
 
- from wlink.world.opcode import Opcode
-from wlink.world import ServerHeader
+from . import ServerHeader
+from .opcode import Opcode
 from wlink.utility.construct import PackEnum
 
 class ItemClass(Enum):

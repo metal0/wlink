@@ -1,7 +1,7 @@
 import construct
 
 from .headers import ServerHeader, ClientHeader
-from wlink.world.opcode import Opcode
+from .opcode import Opcode
 
 
 SMSG_WARDEN_DATA = construct.Struct(

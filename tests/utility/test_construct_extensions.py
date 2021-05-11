@@ -32,7 +32,8 @@ def test_address_port2():
 
 def test_packed_guid():
 	guid = Guid(value=0x7000000003372cc)
-	assert unpack_guid(*pack_guid(guid.value)) == guid.value
+	print(pack_guid(guid.value))
+	assert Guid(value=unpack_guid(*pack_guid(guid.value))) == guid
 
 	packed_guid = PackGuid(Guid).build(guid)
 	parsed_guid = PackGuid(Guid).parse(packed_guid)

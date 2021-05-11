@@ -2,10 +2,10 @@ from enum import Enum
 
 import construct
 
-from wlink.world.opcode import Opcode
+from .opcode import Opcode
 from .headers import ServerHeader
-from ...guid import Guid
-from ...utility.construct import PackEnum, PackGuid, Coordinates
+from wlink.guid import Guid
+from wlink.utility.construct import PackEnum, PackGuid, Coordinates, GuidConstruct
 
 
 class UpdateFlags(Enum):
@@ -23,11 +23,11 @@ class UpdateFlags(Enum):
 	unk = 0x400
 
 class UpdateType(Enum):
-	values = 0
+	partial = 0
 	movement = 1
 	create_object = 2
 	create_object2 = 3
-	out_of_range_objects = 4
+	far_objects = 4
 	near_objects = 5
 
 class ObjectType(Enum):
@@ -40,7 +40,15 @@ class ObjectType(Enum):
 	dynamic_object = 6
 	corpse = 7
 
-ValuesUpdate = construct.Struct()
+ObjectUpdateInfo = construct.Struct(
+	'update_masks' / construct.PrefixedArray(construct.Byte, construct.Int32ul),
+	# 'values' / construct.Array(construct.len_(construct.this.update_masks) * 4 * 8, construct.Int32ul),
+)
+
+ValuesUpdate = construct.Struct(
+	'guid' / PackGuid(Guid),
+	'object_info' / ObjectUpdateInfo,
+)
 MovementInfo = construct.Struct()
 SplineInfo = construct.Struct()
 
@@ -116,22 +124,33 @@ Update = construct.Struct(
 	'type' / PackEnum(UpdateType),
 	'update' / construct.Switch(
 		construct.this.type, {
-			UpdateType.values: ValuesUpdate,
+			UpdateType.partial: ValuesUpdate,
 			UpdateType.create_object: CreateObjectUpdate,
 			UpdateType.create_object2: CreateObject2Update,
 			UpdateType.movement: MovementUpdate,
 			UpdateType.near_objects: NearObjectsUpdate,
-			UpdateType.out_of_range_objects: OutOfRangeObjectsUpdate,
+			UpdateType.far_objects: OutOfRangeObjectsUpdate,
 		}
 	),
 )
 
 SMSG_UPDATE_OBJECT = construct.Struct(
 	'header' / ServerHeader(Opcode.SMSG_UPDATE_OBJECT, 0),
+	# construct.Padding(1),
 	'updates' / construct.PrefixedArray(construct.Int32ul, Update),
+)
+
+CompressedUpdateStub = construct.Struct(
 )
 
 SMSG_COMPRESSED_UPDATE_OBJECT = construct.Struct(
 	'header' / ServerHeader(Opcode.SMSG_COMPRESSED_UPDATE_OBJECT, 0),
-	'data' / construct.Bytes(construct.this.header.size - 2)
+	'uncompressed_size' / construct.Int32ul,
+	'updates' / construct.Compressed(construct.PrefixedArray(construct.Int32ul, Update), 'zlib')
+)
+
+SMSG_DESTROY_OBJECT = construct.Struct(
+	'header' / ServerHeader(Opcode.SMSG_DESTROY_OBJECT),
+	'guid' / GuidConstruct(Guid),
+	'player' / construct.Flag, # Not sure
 )

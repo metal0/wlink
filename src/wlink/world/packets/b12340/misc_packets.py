@@ -3,7 +3,7 @@ import construct
 # TODO: There is DOS potential here as well as with SMSG_ADDON_INFO as mentioned on the TrinityCore Github.
 #  I suspect this is due to world protocol using zlib DEFLATE compression, which is susceptible to decompression bombs.
 #  Though I don't know how effective this will be in the context of TCP streams.
-from wlink.world.opcode import Opcode
+from .opcode import Opcode
 from .headers import ServerHeader
 
 SMSG_ADDON_INFO = construct.Struct(

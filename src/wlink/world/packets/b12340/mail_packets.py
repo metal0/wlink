@@ -2,7 +2,7 @@ import construct
 from enum import Enum
 
 from wlink.guid import Guid
-from wlink.world.opcode import Opcode
+from .opcode import Opcode
 from .headers import ServerHeader, ClientHeader
 from wlink.utility.construct import GuidConstruct, PackEnum
 

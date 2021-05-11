@@ -4,7 +4,7 @@ import construct
 
 from wlink.utility.construct import PackEnum, GuidConstruct, Coordinates
 from .headers import ServerHeader, ClientHeader
-from wlink.world.opcode import Opcode
+from .opcode import Opcode
 from wlink.guid import Guid
 
 class Race(Enum):

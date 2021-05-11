@@ -1,6 +1,5 @@
 from wlink import Guid
-from wlink.world.packets import SMSG_NOTIFICATION
-from wlink.world.packets.global_packets import SMSG_INVALIDATE_PLAYER
+from wlink.world.packets import SMSG_INVALIDATE_PLAYER
 
 def test_SMSG_INVALIDATE_PLAYER():
     data = b'\x00\n\x1c\x03\xd0S\x00\x00\x00\x00\x00\x00'

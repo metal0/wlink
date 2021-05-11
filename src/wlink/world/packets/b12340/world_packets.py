@@ -4,8 +4,8 @@ import construct
 
 from wlink.guid import Guid
 from wlink.utility.construct import Coordinates, PackEnum, GuidConstruct
-from wlink.world import Opcode
-from wlink.world.packets import ServerHeader, ClientHeader
+from wlink.world.packets.b12340.opcode import Opcode
+from wlink.world.packets.b12340.headers import ServerHeader, ClientHeader
 
 SMSG_CANCEL_COMBAT = construct.Struct(
     'header' / ServerHeader(Opcode.SMSG_CANCEL_COMBAT),

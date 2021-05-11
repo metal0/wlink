@@ -3,9 +3,9 @@ from enum import Enum
 import construct
 
 from .headers import ClientHeader, ServerHeader
-from wlink.world.opcode import Opcode
+from .opcode import Opcode
 from wlink.guid import Guid
-from ...utility.construct import GuidConstruct, PackEnum, PackGuid
+from wlink.utility.construct import GuidConstruct, NegatedFlag
 
 # CMSG_GROUP_SET_LEADER = 0x078
 # SMSG_GROUP_SET_LEADER = 0x079
@@ -61,7 +61,7 @@ CMSG_GROUP_INVITE = construct.Struct(
 
 SMSG_GROUP_INVITE = construct.Struct(
 	'header' / ServerHeader(Opcode.SMSG_GROUP_INVITE, 10),
-	'in_group' / construct.Flag,
+	'can_accept' / construct.Flag,
 	'inviter' / construct.CString('utf8'),
 	construct.Padding(4 + 1 + 4)
 )
@@ -87,6 +87,13 @@ class GroupType(Enum):
 	bg_raid = bg | raid
 	lfg_restricted = 4
 	lfg = 8
+
+_old_to_str = GroupType.__str__
+
+def _to_str(self):
+	return _old_to_str(self).replace('GroupType.', '')
+
+GroupType.__str__ = _to_str
 
 SMSG_GROUP_LIST = construct.Struct(
 	'header' / ServerHeader(Opcode.SMSG_GROUP_LIST),

@@ -8,7 +8,7 @@ def test_group_invite():
 	print(packet)
 
 	assert packet.header.opcode == Opcode.SMSG_GROUP_INVITE
-	assert packet.in_group == True
+	assert packet.can_accept
 	assert packet.inviter == 'Act'
 
 def test_group_list():

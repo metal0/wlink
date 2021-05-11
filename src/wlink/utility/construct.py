@@ -266,6 +266,16 @@ class PackGuid(construct.Adapter):
 		mask, data = pack_guid(obj.value)
 		return {"mask": mask, "data": data}
 
+class NegatedFlag(construct.Adapter):
+	def __init__(self):
+		super().__init__(construct.Flag)
+
+	def _decode(self, obj: bool, context, path) -> bool:
+		return not obj
+
+	def _encode(self, obj: bool, context, path) -> bool:
+		return not obj
+
 def int8(num: int):
 	return (2 ** 8 - 1) & num
 

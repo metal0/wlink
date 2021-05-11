@@ -2,8 +2,7 @@ import trio
 import hashlib
 import hmac
 import random
-import traceback
-from typing import Optional, List, Tuple
+from typing import Optional, List
 from construct import ConstructError
 
 from wlink.world.packets import *
@@ -25,7 +24,7 @@ class WorldProtocol:
 		self._encrypter, self._decrypter = None, None
 		self._num_packets_received = 0
 		self._num_packets_sent = 0
-		self._average_fragmentation = 0
+		self._average_num_frames = 1
 
 		self._init_encryption(session_key)
 
@@ -182,22 +181,23 @@ class WorldClientProtocol(WorldProtocol):
 			logger.log('PACKETS', f'{header=}')
 			data = header_data
 
-			fragmentation_count = 0
+			num_packets = 0
 			bytes_left = header.size - 2
 			while bytes_left > 0:
 				leftover_bytes = await self.receive_some(max_bytes=bytes_left)
 
-				fragmentation_count += 1
+				num_packets += 1
 				data += leftover_bytes
 				bytes_left -= len(leftover_bytes)
 				if leftover_bytes is None or len(leftover_bytes) == 0:
 					raise ProtocolError('received EOF from server')
 
 			try:
-				self._average_fragmentation += fragmentation_count
-				self._average_fragmentation /= 2
+				self._average_num_frames += num_packets
+				self._average_num_frames /= 2
+				fragmentation = abs(int(100 * (num_packets / self._average_num_frames - 1)))
 
-				logger.log('PACKETS', f'fragmentation: {self._average_fragmentation}')
+				logger.log('PACKETS', f'fragmentation: {fragmentation}%, average: {self._average_num_frames}')
 				logger.log('PACKETS', f'{data=}')
 
 				packet = self.parser.parse(data, header)
@@ -593,6 +593,7 @@ class WorldClientProtocol(WorldProtocol):
 		"""
 		await self._send_encrypted_packet(
 			CMSG_GUILD_SET_PUBLIC_NOTE,
+			header=dict(size=4 + 2 * (len(player) + 1)),
 			player=player,
 			note=note
 		)
@@ -613,7 +614,7 @@ class WorldClientProtocol(WorldProtocol):
 		"""
 		await self._send_encrypted_packet(
 			CMSG_GUILD_CREATE,
-			header={'size': len(guild_name) + 1 + 4},
+			header=dict(size=4 + len(guild_name) + 1),
 			guild_name=guild_name
 		)
 

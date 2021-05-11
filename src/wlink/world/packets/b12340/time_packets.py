@@ -1,7 +1,7 @@
 import construct
 
 from .headers import ServerHeader, ClientHeader
-from wlink.world.opcode import Opcode
+from .opcode import Opcode
 
 CMSG_TIME_SYNC_RESP = construct.Struct(
 	'header' / ClientHeader(Opcode.CMSG_TIME_SYNC_RESP, 8),
