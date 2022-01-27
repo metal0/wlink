@@ -1,19 +1,16 @@
 import json
-import os
 
 import construct
 import trio
 import os
 
-from wlink.log import logger, configure_log
-
-
 from wlink.guid import Guid
 from wlink.world import WorldClientProtocol, WorldServerProtocol
-from wlink.world.packets import parse, Opcode, ClientHeader, Expansion, AuthResponse, Gender, Race, CombatClass, \
+from wlink.world.packets import Opcode, ClientHeader, Expansion, AuthResponse, Gender, Race, CombatClass, \
 	CMSG_GUILD_INFO_TEXT, CMSG_AUCTION_LIST_ITEMS, SMSG_NAME_QUERY_RESPONSE, SMSG_AUTH_RESPONSE, NameInfo, \
 	CMSG_PING, SMSG_ADDON_INFO, CMSG_GET_MAIL_LIST, CMSG_AUCTION_LIST_OWNER_ITEMS, CMSG_AUCTION_LIST_PENDING_SALES, \
-	CMSG_AUCTION_PLACE_BID, CMSG_AUCTION_SELL_ITEM, AuctionSellData, CMSG_GUILD_ROSTER, CMSG_WHO, CMSG_WHOIS
+	CMSG_AUCTION_PLACE_BID, CMSG_AUCTION_SELL_ITEM, AuctionSellData, CMSG_GUILD_ROSTER, CMSG_WHO
+from wlink.world.packets.b12340 import parse
 
 logins_filename = os.environ.get('WLINK_TEST_CREDS')
 with open(logins_filename) as f:

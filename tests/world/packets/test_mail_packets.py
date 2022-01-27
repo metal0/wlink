@@ -1,7 +1,6 @@
 from wlink.world.packets import CMSG_GET_MAIL_LIST, MailType, SMSG_MAIL_LIST_RESULT, SMSG_RECEIVED_MAIL, \
 	SMSG_SEND_MAIL_RESULT, MailResponseType, MailResponse
 from wlink.guid import Guid
-from wlink.world.packets.parse import WorldServerPacketParser
 
 
 def test_CMSG_GET_MAIL_LIST():
