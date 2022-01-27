@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "wlink"
-version = "0.1.0"
+version = "0.0.2"
 description = ""
 authors = ["Shaun Ostoic <ostoic@uwindsor.ca>"]
 license = "GPL-3.0-or-later"
