@@ -1,7 +1,7 @@
 import construct
 
 from .headers import ServerHeader
-from wlink.world.opcode import Opcode
+from .opcode import Opcode
 
 SMSG_TUTORIAL_FLAGS = construct.Struct(
 	'header' / ServerHeader(Opcode.SMSG_TUTORIAL_FLAGS, 4 * 8),

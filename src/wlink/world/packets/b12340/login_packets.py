@@ -2,7 +2,7 @@ import construct
 
 from wlink.utility.construct import Coordinates, GuidConstruct
 from .headers import ServerHeader, ClientHeader
-from wlink.world.opcode import Opcode
+from .opcode import Opcode
 from wlink.guid import Guid
 
 SMSG_LOGIN_VERIFY_WORLD = construct.Struct(

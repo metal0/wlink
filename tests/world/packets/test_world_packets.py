@@ -1,8 +1,9 @@
 from wlink.guid import Guid, GuidType
-from wlink.world.packets import SMSG_LOGIN_VERIFY_WORLD, SMSG_LOGOUT_RESPONSE, SMSG_NOTIFICATION, \
-	SMSG_CLIENTCACHE_VERSION, SMSG_TUTORIAL_FLAGS, SMSG_ADDON_INFO, SMSG_CHAR_ENUM, Race, Gender, CombatClass, \
+from wlink.world.packets import SMSG_LOGIN_VERIFY_WORLD, SMSG_LOGOUT_RESPONSE, SMSG_CLIENTCACHE_VERSION, \
+	SMSG_TUTORIAL_FLAGS, SMSG_ADDON_INFO, SMSG_CHAR_ENUM, Race, Gender, CombatClass, \
 	CMSG_CHAR_ENUM, CMSG_PLAYER_LOGIN, SMSG_TIME_SYNC_REQ, CMSG_TIME_SYNC_RESP, CMSG_NAME_QUERY, \
-	SMSG_NAME_QUERY_RESPONSE, Opcode, SMSG_INIT_WORLD_STATES, SMSG_BIND_POINT_UPDATE, SMSG_MOTD
+	SMSG_NAME_QUERY_RESPONSE, Opcode, SMSG_INIT_WORLD_STATES, SMSG_BIND_POINT_UPDATE, SMSG_CRITERIA_UPDATE, \
+	SMSG_QUERY_TIME_RESPONSE, SMSG_TRANSFER_PENDING, SMSG_NEW_WORLD, SMSG_CANCEL_COMBAT, SMSG_WEATHER, WeatherType
 
 
 def test_SMSG_LOGIN_VERIFY_WORLD():
@@ -23,11 +24,6 @@ def test_SMSG_LOGOUT_RESPONSE():
 	assert packet.header.size == 7
 	assert packet.reason == 0
 	assert packet.instant_logout is True
-
-def test_SMSG_NOTIFICATION():
-	data = b'\x00\x13\xcb\x01Unknown language\x00'
-	packet = SMSG_NOTIFICATION.parse(data)
-	assert packet.message == "Unknown language"
 
 def test_SMSG_CLIENTCACHE_VERSION():
 	data = bytes.fromhex('0006AB0403000000')
@@ -169,6 +165,14 @@ def test_CMSG_TIME_SYNC_REQ():
 	assert packet.id == 5
 	assert packet.client_ticks == 50133
 
+def test_SMSG_QUERY_TIME_RESPONSE():
+	data = b'\x00\n\xcf\x01\xdbS\x7f`\x85k\x00\x00'
+	packet = SMSG_QUERY_TIME_RESPONSE.parse(data)
+	print(packet)
+
+	assert packet.game_time == 1618957275
+	assert packet.time_until_reset == 27525
+
 def test_CMSG_NAME_QUERY():
 	data = b'\x00\x0cP\x00\x00\x00\x1f\x00\x00\x00\x00\x00\x00\x00'
 	packet = CMSG_NAME_QUERY.parse(data)
@@ -188,6 +192,53 @@ def test_SMSG_NAME_QUERY():
 	assert packet.info.realm_name == ''
 	assert packet.info.race == Race.human
 	assert packet.info.gender == Gender.female
+
+def test_SMSG_CANCEL_COMBAT():
+	data = b'\x00\x02N\x01'
+	packet = SMSG_CANCEL_COMBAT.parse(data)
+	print(packet)
+
+def test_SMSG_TRANSFER_PENDING():
+	data = b'\x00\x06?\x00\x00\x00\x00\x00'
+	packet = SMSG_TRANSFER_PENDING.parse(data)
+	print(packet)
+
+	assert packet.map_id == 0
+
+	data = b'\x00\x06?\x00;\x02\x00\x00'
+	packet = SMSG_TRANSFER_PENDING.parse(data)
+	print(packet)
+
+	assert packet.map_id == 571
+
+def test_SMSG_NEW_WORLD():
+	data = b'\x00\x16>\x00\x00\x00\x00\x00\x07\xb5\t\xc6@\xd8#D\xc7\xce\xbdB\xcee\xb7?'
+	packet = SMSG_NEW_WORLD.parse(data)
+	print(packet)
+
+	assert packet.map_id == 0
+	assert packet.position.x == -8813.2568359375
+	assert packet.position.y == 655.37890625
+	assert packet.position.z == 94.90386199951172
+	assert packet.rotation == 1.4327943325042725
+
+	data = b'\x00\x16>\x00;\x02\x00\x00\\\x97\nE\xf6\r\xa0E\xfe\xeb\x15A\xcee\xb7?'
+	packet = SMSG_NEW_WORLD.parse(data)
+	print(packet)
+
+	assert packet.map_id == 571
+	assert packet.position.x == 2217.4599609375
+	assert packet.position.y == 5121.7451171875
+	assert packet.position.z == 9.370115280151367
+	assert packet.rotation == 1.4327943325042725
+
+def test_SMSG_WEATHER():
+	data = b'\x00\x0b\xf4\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+	packet = SMSG_WEATHER.parse(data)
+	print(packet)
+
+	assert packet.weather == WeatherType.nice
+	assert packet.grade == 0.0
 
 def test_SMSG_INIT_WORLD_STATES():
 	data = bytes.fromhex('0050C20200000000EF050000EF0500000800D808000000000000D708000000000000D608000000000000D508000000000000D408000000000000D308000000000000770C0000010000003D0F000008000000')
@@ -211,12 +262,8 @@ def test_SMSG_BIND_POINT_UPDATE():
 	assert packet.map_id == 0
 	assert packet.area_id == 12
 
-def test_SMSG_MOTD():
-	data = b'\x00t=\x03\x02\x00\x00\x00Welcome to an AzerothCore server.\x00|cffFF4A2DThis server runs on AzerothCore|r |cff3CE7FFwww.azerothcore.org|r\x00'
-	packet = SMSG_MOTD.parse(data)
 
-	assert packet.header.size == 116
-	assert packet.lines == [
-		'Welcome to an AzerothCore server.',
-		'|cffFF4A2DThis server runs on AzerothCore|r |cff3CE7FFwww.azerothcore.org|r'
-	]
+def test_SMSG_CRITERIA_UPDATE():
+	data = b'\x00\x1aj\x04\x1e\r\x00\x00\x01\xd2\x010\x00\x00\x00\x00\xb7\xd44\x15\x00\x00\x00\x00\x00\x00\x00\x00'
+	packet = SMSG_CRITERIA_UPDATE.parse(data)
+	print(packet)

@@ -1,6 +1,6 @@
 import construct
 
-from wlink.world.opcode import Opcode
+from .opcode import Opcode
 from wlink.utility.construct import PackEnum, int8
 
 def is_large_server_packet(data) -> bool:

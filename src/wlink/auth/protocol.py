@@ -1,10 +1,11 @@
+import construct
 import trio
 
-import wlink.cryptography.sha
-from .packets import ChallengeRequest, parser, ChallengeResponse, ProofRequest, ProofResponse, RealmlistRequest, \
+from .packets import ChallengeRequest, ChallengeResponse, ProofRequest, ProofResponse, RealmlistRequest, \
 	RealmlistResponse
 from .realm import RealmFlags
 from .response import Response
+from ..log import logger
 
 class AuthProtocol:
 	def __init__(self, stream: trio.abc.HalfCloseableStream):
@@ -19,6 +20,17 @@ class AuthProtocol:
 	async def _receive_some(self, max_bytes=None):
 		async with self._read_lock:
 			return await self.stream.receive_some(max_bytes)
+
+	async def receive_packet(self, packet_type):
+		data = bytearray()
+		while True:
+			try:
+				data.extend(await self._receive_some())
+				packet = packet_type.parse(data)
+				logger.log('PACKETS', f'{data=} {packet=}')
+				return packet
+			except construct.ConstructError:
+				pass
 
 	async def send_challenge_request(self, username: str, build=12340, version='3.3.5', country='enUS', game='WoW', arch='x86', os='OSX', ip='127.0.0.1'):
 		await self._send_all(ChallengeRequest.build(dict(
@@ -35,25 +47,24 @@ class AuthProtocol:
 
 	async def send_challenge_response(self, prime: int, server_public: int, salt: int, response: Response=Response.success,
 			generator_length=1, generator=7, prime_length=32, checksum=0, security_flag=0):
-		await self._send_all(ChallengeResponse.build({
-			'server_public': server_public,
-			'response': response,
-			'generator_length': generator_length,
-			'generator': generator,
-			'prime_length': prime_length,
-			'prime': prime,
-			'salt': salt,
-			'checksum': checksum,
-			'security_flag': security_flag
-		}))
+		await self._send_all(ChallengeResponse.build(dict(
+			rc4={
+				'server_public': server_public,
+				'response': response,
+				'generator_length': generator_length,
+				'generator': generator,
+				'prime_length': prime_length,
+				'prime': prime,
+				'salt': salt,
+				'checksum': checksum,
+				'security_flag': security_flag
+		})))
 
 	async def receive_challenge_request(self) -> ChallengeRequest:
-		data = await self._receive_some()
-		return ChallengeRequest.parse(data)
+		return await self.receive_packet(ChallengeRequest)
 
 	async def receive_challenge_response(self) -> ChallengeResponse:
-		data = await self._receive_some()
-		return parser.parse(data)
+		return await self.receive_packet(ChallengeResponse)
 
 	async def send_proof_response(self, response: Response, session_proof_hash: int=0, account_flags=32768, survey_id=0, login_flags=0):
 		await self._send_all(ProofResponse.build(dict(
@@ -74,8 +85,7 @@ class AuthProtocol:
 		)))
 
 	async def receive_proof_request(self) -> ProofRequest:
-		data = await self._receive_some()
-		return ProofRequest.parse(data)
+		return await self.receive_packet(ProofRequest)
 
 	async def receive(self, expected_size: int):
 		data = bytearray()
@@ -86,16 +96,14 @@ class AuthProtocol:
 		return bytes(data)
 
 	async def receive_proof_response(self) -> ProofResponse:
-		data = await self._receive_some()
-		return parser.parse(data)
+		return await self.receive_packet(ProofResponse)
 
 	async def send_realmlist_request(self):
 		packet = RealmlistRequest.build({})
 		await self._send_all(packet)
 
 	async def receive_realmlist_request(self) -> RealmlistRequest:
-		data = await self._receive_some()
-		return RealmlistRequest.parse(data)
+		return await self.receive_packet(RealmlistRequest)
 
 	async def send_realmlist_response(self, realms):
 		size = 8
@@ -110,8 +118,7 @@ class AuthProtocol:
 		}) + b'\x10\x00')
 
 	async def receive_realmlist_response(self) -> RealmlistResponse:
-		data = await self._receive_some()
-		return parser.parse(data)
+		return await self.receive_packet(RealmlistResponse)
 
 	async def aclose(self):
 		await self.stream.aclose()

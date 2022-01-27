@@ -2,7 +2,7 @@ import construct
 
 from wlink.utility.construct import Coordinates
 from .headers import ServerHeader
-from wlink.world.opcode import Opcode
+from .opcode import Opcode
 
 SMSG_BIND_POINT_UPDATE = construct.Struct(
 	'header' / ServerHeader(Opcode.SMSG_BIND_POINT_UPDATE, 4*3 + 4 + 4),

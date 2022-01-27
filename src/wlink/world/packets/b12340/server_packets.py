@@ -4,7 +4,7 @@ import construct
 
 from wlink.utility.construct import PackEnum
 from .headers import ServerHeader
-from wlink.world.opcode import Opcode
+from .opcode import Opcode
 
 class ServerMessageType(Enum):
 	shutdown_time = 1

@@ -1,7 +1,7 @@
 import construct
 
 from .headers import ServerHeader, ClientHeader
-from wlink.world.opcode import Opcode
+from .opcode import Opcode
 
 CMSG_PING = construct.Struct(
 	'header' / ClientHeader(Opcode.CMSG_PING, 8),

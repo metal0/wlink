@@ -191,6 +191,7 @@ class PackedDateTime(construct.Adapter):
 		result |= obj.weekday() << 11
 		result |= obj.hour << 6
 		result |= obj.minute
+		print(result)
 		return result
 		# return ((obj.year - 100) << 24) | (obj.month << 20) | ((obj.day - 1) << 14)  | (obj.weekday() << 11) | (obj.hour << 6) | obj.minute
 
@@ -248,7 +249,7 @@ def unpack_guid(mask: int, data: bytes) -> int:
 
 	return guid
 
-class GuidUnpacker(construct.Adapter):
+class PackGuid(construct.Adapter):
 	def __init__(self, guid_type):
 		super().__init__(construct.Struct(
 			"mask" / construct.Byte,
@@ -264,6 +265,16 @@ class GuidUnpacker(construct.Adapter):
 	def _encode(self, obj, context, path):
 		mask, data = pack_guid(obj.value)
 		return {"mask": mask, "data": data}
+
+class NegatedFlag(construct.Adapter):
+	def __init__(self):
+		super().__init__(construct.Flag)
+
+	def _decode(self, obj: bool, context, path) -> bool:
+		return not obj
+
+	def _encode(self, obj: bool, context, path) -> bool:
+		return not obj
 
 def int8(num: int):
 	return (2 ** 8 - 1) & num

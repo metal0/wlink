@@ -11,7 +11,7 @@ from ..response import Response
 ChallengeRequest = construct.Struct(
 	'header' / ResponseHeader(Opcode.login_challenge, Response.db_busy),
 	'size' / construct.ByteSwapped(construct.Default(construct.Short, 30 + construct.len_(construct.this.account_name))),
-	'game' / construct.Default(construct.PaddedString(4, 'ascii'), 'WoW'),
+	'game' / construct.Default(construct.PaddedString(4, 'utf8'), 'WoW'),
 	'version' / construct.Default(VersionString(num_bytes=3), '3.3.5'),
 	'build' / construct.Default(construct.Int16ul, 12340),
 	'architecture' / construct.Default(PaddedStringByteSwapped(4), 'x86'),
@@ -19,5 +19,5 @@ ChallengeRequest = construct.Struct(
 	'country' / construct.Default(PaddedStringByteSwapped(4), 'enUS'),
 	'timezone_bias' / construct.Default(construct.ByteSwapped(construct.Int32sb), int(-time.timezone / 60)),
 	'ip' / construct.Default(IPv4Address, '127.0.0.1'),
-	'account_name' / UpperPascalString('ascii'),
+	'account_name' / UpperPascalString('utf8'),
 )

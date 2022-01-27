@@ -1,7 +1,7 @@
 import construct
 from enum import Enum
 
-from ..opcode import Opcode
+from .opcode import Opcode
 from .headers import ServerHeader
 from wlink.utility.construct import PackEnum
 

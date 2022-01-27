@@ -4,7 +4,7 @@ import construct
 
 from wlink.utility.construct import PackEnum, GuidConstruct
 from .headers import ClientHeader, ServerHeader
-from wlink.world.opcode import Opcode
+from .opcode import Opcode
 from wlink.guid import Guid, GuidType
 
 class Language(Enum):
@@ -194,3 +194,9 @@ def make_messagechat_packet(gm_chat=False):
 
 SMSG_GM_MESSAGECHAT = make_messagechat_packet(gm_chat=True)
 SMSG_MESSAGECHAT = make_messagechat_packet(gm_chat=False)
+
+SMSG_EMOTE = construct.Struct(
+	'header' / ServerHeader(Opcode.SMSG_EMOTE),
+	'emote_id' / construct.Int32ul,
+	'guid' / GuidConstruct(Guid),
+)

@@ -1,5 +1,5 @@
 import binascii
-import shlex
+from typing import List
 
 
 def int_to_bytes(value) -> bytes:
@@ -28,7 +28,6 @@ def value_of_enum(enum):
 		return enum
 	return enum.value
 
-from typing import List
 def parse_digits_list(l: List[int]) -> int:
 	parity = 1
 	num = 0
