@@ -6,11 +6,11 @@ authors = ["Shaun Ostoic <ostoic@uwindsor.ca>"]
 license = "GPL-3.0-or-later"
 
 [tool.poetry.dependencies]
-python = "^3.9"
-loguru = "*"
-construct = "*"
-trio = "*"
-cryptography = "*"
+python = "^3.7"
+loguru = "^0.6"
+construct = "^2"
+trio = "^0.19"
+cryptography = "^36"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
