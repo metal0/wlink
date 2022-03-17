@@ -3,8 +3,8 @@ import trio
 
 from .packets import ChallengeRequest, ChallengeResponse, ProofRequest, ProofResponse, RealmlistRequest, \
 	RealmlistResponse
+from .packets import Response
 from .realm import RealmFlags
-from .response import Response
 from ..log import logger
 
 class AuthProtocol:
@@ -45,20 +45,20 @@ class AuthProtocol:
 			size=30 + len(username),
 		)))
 
-	async def send_challenge_response(self, prime: int, server_public: int, salt: int, response: Response=Response.success,
+	async def send_challenge_response(self, prime: int, server_public: int, salt: int, response: Response = Response.success,
 			generator_length=1, generator=7, prime_length=32, checksum=0, security_flag=0):
 		await self._send_all(ChallengeResponse.build(dict(
-			rc4={
-				'server_public': server_public,
-				'response': response,
-				'generator_length': generator_length,
-				'generator': generator,
-				'prime_length': prime_length,
-				'prime': prime,
-				'salt': salt,
-				'checksum': checksum,
-				'security_flag': security_flag
-		})))
+			rc4=dict(
+				server_public=server_public,
+				response=response,
+				generator_length=generator_length,
+				generator=generator,
+				prime_length=prime_length,
+				prime=prime,
+				salt=salt,
+				checksum=checksum,
+				security_flag=security_flag
+		))))
 
 	async def receive_challenge_request(self) -> ChallengeRequest:
 		return await self.receive_packet(ChallengeRequest)
@@ -99,8 +99,7 @@ class AuthProtocol:
 		return await self.receive_packet(ProofResponse)
 
 	async def send_realmlist_request(self):
-		packet = RealmlistRequest.build({})
-		await self._send_all(packet)
+		await self._send_all(RealmlistRequest.build({}))
 
 	async def receive_realmlist_request(self) -> RealmlistRequest:
 		return await self.receive_packet(RealmlistRequest)
@@ -112,10 +111,9 @@ class AuthProtocol:
 			if 'flags' in realm and (realm['flags'] & RealmFlags.specify_build) == RealmFlags.specify_build.value:
 				size += 5
 
-		await self._send_all(RealmlistResponse.build({
-			'realms': realms,
-			'size': size
-		}) + b'\x10\x00')
+		await self._send_all(RealmlistResponse.build(dict(
+			realms=realms, size=size
+		)) + b'\x10\x00')
 
 	async def receive_realmlist_response(self) -> RealmlistResponse:
 		return await self.receive_packet(RealmlistResponse)

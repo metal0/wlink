@@ -12,5 +12,4 @@ SMSG_WARDEN_DATA = construct.Struct(
 CMSG_WARDEN_DATA = construct.Struct(
 	'header' / ClientHeader(Opcode.CMSG_WARDEN_DATA),
 	'encrypted' / construct.GreedyBytes,
-
 )

@@ -9,7 +9,7 @@ license = "GPL-3.0-or-later"
 python = "^3.8"
 loguru = "^0.6"
 construct = "^2"
-trio = "^0.19"
+trio = "^0.20"
 cryptography = "^36"
 
 [tool.poetry.dev-dependencies]

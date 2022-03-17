@@ -27,7 +27,7 @@ def test_address_port2():
 	)
 
 	data = Test.build(['hey there', ('127.0.0.1', 8085), 7])
-	assert data  == b'hey there\x00127.0.0.1:8085\x00\x00\x00\x00\x07'
+	assert data == b'hey there\x00127.0.0.1:8085\x00\x00\x00\x00\x07'
 	assert Test.parse(data) == ['hey there', ('127.0.0.1', 8085), 7]
 
 def test_packed_guid():
