@@ -9,7 +9,7 @@ RealmlistRequest = construct.Struct(
 	construct.Padding(4)
 )
 
-def make_realmlist_request(self):
+def make_realmlist_request():
 	return RealmlistRequest.build({})
 
 RealmlistResponse = construct.Struct(

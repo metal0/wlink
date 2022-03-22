@@ -1,7 +1,7 @@
 import construct
 from enum import Enum
 
-from wlink.utility.construct import PackEnum, AddressPort
+from ..utility.construct import PackEnum, AddressPort
 
 class RealmType(Enum):
 	normal = 0
