@@ -27,7 +27,7 @@ def test_group_list():
 	imbued = packet.members[0]
 	assert imbued.name == 'Imbued'
 	assert imbued.guid == Guid(value=0x6)
-	assert imbued.online == False
+	assert imbued.online is False
 	assert imbued.group_id == 0
 	assert imbued.flags == 0
 	assert imbued.roles == 0

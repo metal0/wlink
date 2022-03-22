@@ -1,2 +1,2 @@
-from .protocol import WorldClientProtocol, WorldServerProtocol, WorldProtocol
-from . import packets, protocol
+from .stream import WorldClientStream, WorldServerStream, WorldStream
+from . import packets, stream

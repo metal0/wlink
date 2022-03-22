@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import List
 
 import construct
 
@@ -53,6 +54,9 @@ CMSG_GUILD_ROSTER = construct.Struct(
 	'header' / ClientHeader(Opcode.CMSG_GUILD_ROSTER, 0)
 )
 
+def make_CMSG_GUILD_ROSTER():
+	return CMSG_GUILD_ROSTER.build(dict())
+
 SMSG_GUILD_ROSTER = construct.Struct(
 	'header' / ServerHeader(Opcode.SMSG_GUILD_ROSTER, 0),
 	'total_members' / construct.Int32ul,
@@ -67,13 +71,25 @@ CMSG_GUILD_CREATE = construct.Struct(
 	'guild_name' / construct.CString('ascii')
 )
 
+def make_CMSG_GUILD_CREATE(guild_name: str):
+	return CMSG_GUILD_CREATE.build(dict(
+		header=dict(size=4 + len(guild_name) + 1),
+		guild_name=guild_name
+	))
+
 CMSG_GUILD_ACCEPT = construct.Struct(
 	'header' / ClientHeader(Opcode.CMSG_GUILD_ACCEPT, 0)
 )
 
+def make_CMSG_GUILD_ACCEPT():
+	return CMSG_GUILD_ACCEPT.build(dict())
+
 CMSG_GUILD_DECLINE = construct.Struct(
 	'header' / ClientHeader(Opcode.CMSG_GUILD_DECLINE, 0)
 )
+
+def make_CMSG_GUILD_DECLINE():
+	return CMSG_GUILD_DECLINE.build(dict())
 
 class GuildMemberDataType(Enum):
 	zone_id = 1
@@ -141,6 +157,14 @@ SMSG_GUILD_INVITE = construct.Struct(
 	'guild' / construct.CString('utf8')
 )
 
+def make_SMSG_GUILD_INVITE(inviter: str, guild: str):
+	return SMSG_GUILD_INVITE.build(dict(
+		header=dict(size=len(inviter) + len(guild) + 2),
+		inviter=inviter,
+		guild=guild
+	))
+
+
 class GuildEventType(Enum):
 	promotion = 0
 	demotion = 1
@@ -184,6 +208,11 @@ CMSG_GUILD_QUERY = construct.Struct(
 	'guild_id' / construct.Int32ul,
 )
 
+def make_CMSG_GUILD_QUERY(guild_id: int):
+	return CMSG_GUILD_QUERY.build(dict(
+		guild_id=guild_id
+	))
+
 SMSG_GUILD_QUERY_RESPONSE = construct.Struct(
 	'header' / ServerHeader(Opcode.SMSG_GUILD_QUERY_RESPONSE, 8 * 32 + 200),
 	'guild_id' / construct.Int32ul,
@@ -197,6 +226,27 @@ SMSG_GUILD_QUERY_RESPONSE = construct.Struct(
 	'num_ranks' / construct.Int32ul,
 )
 
+async def send_SMSG_GUILD_QUERY_RESPONSE(
+	guild_id: int,	name: str,ranks: List[str],
+	emblem_style: int, emblem_color: int,
+	border_style: int,border_color: int,
+	background_color: int,
+	num_ranks: int,
+):
+	ranks_size = sum((len(s) + 1 for s in ranks))
+	return SMSG_GUILD_QUERY_RESPONSE.build(dict(
+		header=dict(size=4 + len(name) + 1 + ranks_size + 4 * 6),
+		guild_id=guild_id,
+		name=name,
+		ranks=ranks,
+		emblem_style=emblem_style,
+		emblem_color=emblem_color,
+		border_style=border_style,
+		border_color=border_color,
+		background_color=background_color,
+		num_ranks=num_ranks,
+	))
+
 CMSG_GUILD_SET_OFFICER_NOTE = construct.Struct(
 	'header' / ClientHeader(Opcode.CMSG_GUILD_SET_OFFICER_NOTE),
 	'player' / construct.CString('utf8'),
@@ -209,6 +259,13 @@ CMSG_GUILD_SET_PUBLIC_NOTE = construct.Struct(
 	'note' / construct.CString('utf8')
 )
 
+def make_CMSG_GUILD_SET_PUBLIC_NOTE(player: str, note: str):
+	return CMSG_GUILD_SET_PUBLIC_NOTE.build(dict(
+		header=dict(size=4 + 2 * (len(player) + 1)),
+		player=player,
+		note=note
+	))
+
 CMSG_GUILD_MOTD = construct.Struct(
 	'header' / ClientHeader(Opcode.CMSG_GUILD_INFO, 0),
 	'motd' / construct.CString('utf8') # max length is 128 (TODO: check for overflow)
@@ -217,6 +274,9 @@ CMSG_GUILD_MOTD = construct.Struct(
 CMSG_GUILD_INFO = construct.Struct(
 	'header' / ClientHeader(Opcode.CMSG_GUILD_INFO, 0),
 )
+
+def make_CMSG_GUILD_INFO():
+	return CMSG_GUILD_INFO.build(dict())
 
 SMSG_GUILD_INFO = construct.Struct(
 	'header' / ServerHeader(Opcode.SMSG_GUILD_INFO, construct.len_(construct.this.name) + 4 + 4 + 4),
@@ -231,10 +291,22 @@ CMSG_GUILD_INFO_TEXT = construct.Struct(
 	'info' / construct.CString('utf8'), # max length is 500 (TODO: check for overflow)
 )
 
+def make_CMSG_GUILD_INFO_TEXT(info: str):
+	return CMSG_GUILD_INFO_TEXT.build(dict(
+		header=dict(size=4 + len(info) + 1),
+		info=info
+	))
+
 CMSG_GUILD_EVENT_LOG_QUERY = construct.Struct(
 	'header' / ClientHeader(Opcode.MSG_GUILD_EVENT_LOG_QUERY),
 )
 
+def make_CMSG_GUILD_EVENT_LOG_QUERY():
+	return CMSG_GUILD_EVENT_LOG_QUERY.build(dict())
+
 SMSG_GUILD_EVENT_LOG_QUERY = construct.Struct(
 	'header' / ServerHeader(Opcode.MSG_GUILD_EVENT_LOG_QUERY),
 )
+
+def make_SMSG_GUILD_EVENT_LOG_QUERY():
+	return SMSG_GUILD_EVENT_LOG_QUERY.build(dict())

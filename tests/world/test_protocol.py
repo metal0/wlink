@@ -1,16 +1,11 @@
 import json
-
-import construct
 import trio
 import os
 
-from wlink.guid import Guid
-from wlink.world import WorldClientProtocol, WorldServerProtocol
-from wlink.world.packets import Opcode, ClientHeader, Expansion, AuthResponse, Gender, Race, CombatClass, \
-	CMSG_GUILD_INFO_TEXT, CMSG_AUCTION_LIST_ITEMS, SMSG_NAME_QUERY_RESPONSE, SMSG_AUTH_RESPONSE, NameInfo, \
-	CMSG_PING, SMSG_ADDON_INFO, CMSG_GET_MAIL_LIST, CMSG_AUCTION_LIST_OWNER_ITEMS, CMSG_AUCTION_LIST_PENDING_SALES, \
-	CMSG_AUCTION_PLACE_BID, CMSG_AUCTION_SELL_ITEM, AuctionSellData, CMSG_GUILD_ROSTER, CMSG_WHO
+from wlink.world import WorldClientStream, WorldServerStream
+from wlink.world.packets import *
 from wlink.world.packets.b12340 import parse
+from wlink.log import logger
 
 logins_filename = os.environ.get('WLINK_TEST_CREDS')
 with open(logins_filename) as f:
@@ -18,6 +13,21 @@ with open(logins_filename) as f:
 
 ac_login = test_servers['acore']['account']
 
+async def test_stream_sending_sanity():
+	session_key = 887638991071640811242800621506026194914017482863646559938463468713468253926173117812986327918380
+	(client_stream, server_stream) = trio.testing.memory_stream_pair()
+
+	client = WorldClientStream(client_stream, session_key=session_key)
+	await client.send_all(make_CMSG_AUTH_SESSION(ac_login['username'], 1, 2, 3))
+
+	server = WorldServerStream(server_stream, session_key=session_key)
+	auth_session = await server.receive_unencrypted_packet(CMSG_AUTH_SESSION)
+	assert auth_session.header.opcode == Opcode.CMSG_AUTH_SESSION
+	assert auth_session.build == 12340
+	assert auth_session.login_server_id == 0
+	assert auth_session.account_name == ac_login['username'].upper()
+	assert auth_session.client_seed == 1
+	assert auth_session.account_hash == 2
 
 async def find_client_packets():
 	parser = parse.WorldClientPacketParser()
@@ -42,14 +52,24 @@ async def run_client_server_protocol_sanity_test(client, server, packet, **param
 	if packet_name is None:
 		raise ValueError('Unable to determine packet name')
 
-	print(f'{packet_name=}')
-	send = getattr(client, f'send_{packet_name}')
-	await send(**params)
+	logger.debug(f'{packet_name=}')
+	from pprint import pprint
+	# pprint(f'{globals()=}')
 
+	logger.info('Client sending packet')
+	for name, var in globals().items():
+		if name == f'make_{packet_name}':
+			logger.info(f'Found make_{packet_name=}!')
+			make = var
+			await client.send_all(make(**params))
+
+	logger.info('Server reading packet')
 	result = await server.next_decrypted_packet()
+	logger.debug(f'{result=}')
+
 	for key, value in params.items():
 		check = getattr(result, key)
-		print(f'compare: {key=} {packet_name=} {check=} vs {value=}')
+		logger.debug(f'compare: {key=} {packet_name=} {check=} vs {value=}')
 		assert check == value
 
 
@@ -62,8 +82,11 @@ async def run_server_client_protocol_sanity_test(server, client, packet, **param
 	if packet_name is None:
 		raise ValueError('Unable to determine packet name')
 
-	send = getattr(server, f'send_{packet_name}')
-	await send(**params)
+	for name, var in globals().items():
+		if name == f'make_{packet_name}':
+			print(f'Found make_{packet_name}!')
+			make = var
+			await server.send_all(make(**params))
 
 	result = await client.next_decrypted_packet()
 	for key, value in params.items():
@@ -75,11 +98,11 @@ async def test_protocol_packet_fns():
 	session_key = 887638991071640811242800621506026194914017482863646559938463468713468253926173117812986327918380
 	(client_stream, server_stream) = trio.testing.memory_stream_pair()
 
-	client = WorldClientProtocol(client_stream, session_key=session_key)
-	await client.send_CMSG_AUTH_SESSION(ac_login['username'], 1, 2, 3)
+	client = WorldClientStream(client_stream, session_key=session_key)
+	await client.send_all(make_CMSG_AUTH_SESSION(ac_login['username'], 1, 2, 3))
 
-	server = WorldServerProtocol(server_stream, session_key=session_key)
-	auth_session = await server.receive_CMSG_AUTH_SESSION()
+	server = WorldServerStream(server_stream, session_key=session_key)
+	auth_session = await server.receive_unencrypted_packet(CMSG_AUTH_SESSION)
 	assert auth_session.header.opcode == Opcode.CMSG_AUTH_SESSION
 	assert auth_session.build == 12340
 	assert auth_session.login_server_id == 0
@@ -89,29 +112,29 @@ async def test_protocol_packet_fns():
 
 	cmsg_tests = [
 		(CMSG_PING, dict(id=10, latency=60)),
-		(CMSG_GUILD_INFO_TEXT, dict(info='Guild info test')),
-		(CMSG_GUILD_ROSTER, dict()),
-		(CMSG_GET_MAIL_LIST, dict(mailbox=Guid(0xF11002FC1301873C))),
-		(CMSG_AUCTION_LIST_OWNER_ITEMS, dict(auctioneer=Guid(0xF1300021DE01375A), list_start=0)),
-		(CMSG_AUCTION_LIST_PENDING_SALES, dict(auctioneer=Guid(0xF1300021DE01375A))),
-		(CMSG_AUCTION_PLACE_BID, dict(auctioneer=Guid(0xF1300021DE01375A), auction_id=100, price=240000)),
-		(CMSG_AUCTION_SELL_ITEM, dict(
-			auctioneer=Guid(0xF1300021DE01375A),
-			bid=100000, buyout=200000, expiry_time=24,
-			auction_items=[
-				AuctionSellData.parse(AuctionSellData.build(dict(guid=Guid(0x1), count=7))),
-				AuctionSellData.parse(AuctionSellData.build(dict(guid=Guid(0x7), count=1))),
-			])),
-		(CMSG_AUCTION_LIST_ITEMS, dict(
-			auctioneer=Guid(0xF1300021DE01375A), search_term='Bread',
-			list_start=0, min_level=0, max_level=80,
-			slot_id=0, category=0, subcategory=0,
-			rarity=0, usable=False, is_full=True
-		)),
-		(CMSG_WHO, dict(
-			name='Horse',
-			min_level=1, max_level=80,
-		)),
+		# (CMSG_GUILD_INFO_TEXT, dict(info='Guild info test')),
+		# (CMSG_GUILD_ROSTER, dict()),
+		# (CMSG_GET_MAIL_LIST, dict(mailbox=Guid(0xF11002FC1301873C))),
+		# (CMSG_AUCTION_LIST_OWNER_ITEMS, dict(auctioneer=Guid(0xF1300021DE01375A), list_start=0)),
+		# (CMSG_AUCTION_LIST_PENDING_SALES, dict(auctioneer=Guid(0xF1300021DE01375A))),
+		# (CMSG_AUCTION_PLACE_BID, dict(auctioneer=Guid(0xF1300021DE01375A), auction_id=100, price=240000)),
+		# (CMSG_AUCTION_SELL_ITEM, dict(
+		# 	auctioneer=Guid(0xF1300021DE01375A),
+		# 	bid=100000, buyout=200000, expiry_time=24,
+		# 	auction_items=[
+		# 		AuctionSellData.parse(AuctionSellData.build(dict(guid=Guid(0x1), count=7))),
+		# 		AuctionSellData.parse(AuctionSellData.build(dict(guid=Guid(0x7), count=1))),
+		# 	])),
+		# (CMSG_AUCTION_LIST_ITEMS, dict(
+		# 	auctioneer=Guid(0xF1300021DE01375A), search_term='Bread',
+		# 	list_start=0, min_level=0, max_level=80,
+		# 	slot_id=0, category=0, subcategory=0,
+		# 	rarity=0, usable=False, is_full=True
+		# )),
+		# (CMSG_WHO, dict(
+		# 	name='Horse',
+		# 	min_level=1, max_level=80,
+		# )),
 		# (CMSG_WHOIS, dict(
 		#     name='Horsemo'
 		# )),
@@ -134,8 +157,12 @@ async def test_protocol_packet_fns():
 		)),
 	]
 
-	for test in cmsg_tests:
-		await run_client_server_protocol_sanity_test(client, server, test[0], **test[1])
+	with trio.fail_after(5):
+		for i, test in enumerate(cmsg_tests):
+			print(f'cmsg test: {i=}')
+			await run_client_server_protocol_sanity_test(client, server, test[0], **test[1])
 
-	for test in smsg_tests:
-		await run_server_client_protocol_sanity_test(server, client, test[0], **test[1])
+	with trio.fail_after(5):
+		for i, test in enumerate(smsg_tests):
+			print(f'smsg test: {i=}')
+			await run_server_client_protocol_sanity_test(server, client, test[0], **test[1])

@@ -10,6 +10,8 @@ CMSG_DUEL_ACCEPTED = construct.Struct(
 	'header' / ClientHeader(Opcode.CMSG_DUEL_ACCEPTED, 8),
 	'unk' / construct.Default(GuidConstruct(Guid), Guid()),
 )
+def make_CMSG_DUEL_ACCEPTED():
+	return CMSG_DUEL_ACCEPTED.build(dict())
 
 CMSG_DUEL_CANCELLED = construct.Struct(
 	'header' / ClientHeader(Opcode.CMSG_DUEL_CANCELLED, 8),

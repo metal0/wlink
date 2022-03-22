@@ -1,3 +1,6 @@
+import random
+from typing import Optional
+
 import construct
 from enum import Enum
 
@@ -31,6 +34,26 @@ CMSG_AUTH_SESSION = construct.Struct(
 	),
 )
 
+def make_CMSG_AUTH_SESSION(
+	account_name, client_seed, account_hash, realm_id,
+	build=12340, login_server_id=0, login_server_type=0, region_id=0, battlegroup_id=0,
+	addon_info: bytes = default_addon_bytes
+) -> bytes:
+	return CMSG_AUTH_SESSION.build(dict(
+
+		build=build,
+		login_server_id=login_server_id,
+		account_name=account_name,
+		login_server_type=login_server_type,
+		client_seed=client_seed,
+		region_id=region_id,
+		battlegroup_id=battlegroup_id,
+		realm_id=realm_id,
+		account_hash=account_hash,
+		addon_info=addon_info,
+		header=dict(size=len(addon_info) + len(account_name))
+	))
+
 SMSG_AUTH_CHALLENGE = construct.Struct(
 	'header' / ServerHeader(Opcode.SMSG_AUTH_CHALLENGE, 40),
 	construct.Padding(4),
@@ -38,6 +61,17 @@ SMSG_AUTH_CHALLENGE = construct.Struct(
 	'encryption_seed1' / construct.BytesInteger(16, swapped=True),
 	'encryption_seed2' / construct.BytesInteger(16, swapped=True)
 )
+
+def make_SMSG_AUTH_CHALLENGE(
+	server_seed: int = random.getrandbits(32),
+	encryption_seed1: int = random.getrandbits(16),
+	encryption_seed2: int = random.getrandbits(16)
+) -> bytes:
+	return SMSG_AUTH_CHALLENGE.build(dict(
+		server_seed=server_seed,
+		encryption_seed1=encryption_seed1,
+		encryption_seed2=encryption_seed2
+	))
 
 class AuthResponse(Enum):
 	ok = 0x0C
@@ -81,3 +115,26 @@ SMSG_AUTH_RESPONSE = construct.Struct(
 		}
 	), construct.Pass)
 )
+
+def make_SMSG_AUTH_RESPONSE(
+	response: AuthResponse, expansion=Expansion.wotlk,
+	queue_position: Optional[int] = None,
+	billing=None
+) -> bytes:
+	if billing is None:
+		billing = dict(
+			billing=dict(
+			time_left=0, time_rested=0,
+			plan=0,
+		))
+
+	size = 1 + (4 + 1 + 4) + 1
+	if queue_position is not None:
+		size += 4
+
+	return SMSG_AUTH_RESPONSE.build(dict(
+		header=dict(size=size + 2),
+		response=response, expansion=expansion,
+		queue_position=queue_position,
+		billing=billing,
+	))

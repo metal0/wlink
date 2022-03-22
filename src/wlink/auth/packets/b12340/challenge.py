@@ -22,6 +22,23 @@ ChallengeRequest = construct.Struct(
     'account_name' / UpperPascalString('utf8'),
 )
 
+
+def make_challenge_request(
+    username: str, build=12340,
+    version='3.3.5', country='enUS', game='WoW',
+    arch='x86', os='OSX', ip='127.0.0.1'
+):
+    return ChallengeRequest.build(dict(
+        country=country,
+        build=build,
+        version=version,
+        game=game,
+        architecture=arch,
+        account_name=username,
+        ip=ip, os=os,
+        size=30 + len(username),
+    ))
+
 ChallengeResponse = construct.Struct(
     'header' / ResponseHeader(Opcode.login_challenge),
     'response' / construct.Default(PackEnum(Response), Response.success),
@@ -42,3 +59,23 @@ ChallengeResponse = construct.Struct(
         construct.Pass
     )
 )
+
+def make_challenge_response(
+    prime: int, server_public: int, salt: int,
+    response: Response = Response.success,
+    generator_length=1, generator=7,
+    prime_length=32, checksum=0, security_flag=0
+):
+    return ChallengeResponse.build(dict(
+        rc4=dict(
+            server_public=server_public,
+            response=response,
+            generator_length=generator_length,
+            generator=generator,
+            prime_length=prime_length,
+            prime=prime,
+            salt=salt,
+            checksum=checksum,
+            security_flag=security_flag
+        )
+    ))

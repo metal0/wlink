@@ -28,3 +28,16 @@ SMSG_MOTD = construct.Struct(
 	'header' / ServerHeader(Opcode.SMSG_MOTD, 4),
 	'lines' / construct.PrefixedArray(construct.Int32ul, construct.CString('ascii'))
 )
+
+def make_SMSG_MOTD(lines):
+	if type(lines) is str:
+		lines = (lines,)
+
+	size = 2 + 4
+	for line in lines:
+		size += len(line) + 1
+
+	return SMSG_MOTD.build(dict(
+		header=dict(size=size),
+		lines=lines
+	))

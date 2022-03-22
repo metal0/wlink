@@ -9,4 +9,4 @@ def configure_log(logger=logger, packets_level=5, events_level=15, messages_leve
 	logger.level('EVENTS', no=events_level, color='<cyan>', icon='EVENTS')
 	logger.level('MESSAGES', no=messages_level, color='<green>', icon='MESSAGES')
 
-configure_log(packets_level=5)
+configure_log(packets_level=15)

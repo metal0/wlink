@@ -11,14 +11,14 @@ def is_large_server_packet(data) -> bool:
 	else:
 		return is_large_server_packet(data.size)
 
-def ClientHeader(opcode = None, size = 0):
+def ClientHeader(opcode=None, body_size=0):
 	if opcode is None:
 		opcode_con = PackEnum(Opcode, construct.Int32ul)
 	else:
 		opcode_con = construct.Default(construct.Const(opcode, PackEnum(Opcode, construct.Int32ul)), opcode)
 
 	return construct.Struct(
-		'size' / construct.Default(construct.Int16ub, size + 4),
+		'size' / construct.Default(construct.Int16ub, body_size + 4),
 		'opcode' / opcode_con
 	)
 
@@ -55,7 +55,7 @@ class ServerSize(construct.Adapter):
 
 		return dict(mask=mask, rest=rest)
 
-def ServerHeader(opcode = None, size = 0):
+def ServerHeader(opcode=None, size=0):
 	if opcode is None:
 		opcode_con = construct.ByteSwapped(PackEnum(Opcode, construct.Short))
 	else:

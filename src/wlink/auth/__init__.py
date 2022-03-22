@@ -1,4 +1,4 @@
-from . import packets, protocol
+from . import packets, stream
 from .account import AccountStatus, AccountType
-from .protocol import AuthProtocol
+from .stream import AuthProtocol
 from .security_flags import SecurityFlag

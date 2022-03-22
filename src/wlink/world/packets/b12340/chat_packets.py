@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Optional
 
 import construct
 
@@ -100,6 +101,22 @@ CMSG_MESSAGECHAT = construct.Struct(
 	'text' / construct.CString('utf-8')
 )
 
+
+def make_CMSG_MESSAGECHAT(
+	text: str, message_type,
+	language, recipient: Optional[str] = None,
+	channel: Optional[str] = None
+):
+	size = 4 + 4 + len(text)
+	if message_type in (MessageType.whisper, MessageType.channel):
+		size += max(len(channel), len(recipient))
+
+	return CMSG_MESSAGECHAT.build(dict(
+		header={'size': size + 5},
+		text=text, message_type=message_type, language=language,
+		receiver=recipient, channel=channel
+	))
+
 MonsterMessage = construct.Struct(
 	'sender' / construct.Prefixed(construct.Int32ul, construct.CString('ascii')),
 	'receiver_guid' / GuidConstruct(Guid),
@@ -194,6 +211,9 @@ def make_messagechat_packet(gm_chat=False):
 
 SMSG_GM_MESSAGECHAT = make_messagechat_packet(gm_chat=True)
 SMSG_MESSAGECHAT = make_messagechat_packet(gm_chat=False)
+
+# def make_SMSG_MESSAGECHAT() -> SMSG_MESSAGECHAT:
+# 	return SMSG_MESSAGECHAT.build(dict())
 
 SMSG_EMOTE = construct.Struct(
 	'header' / ServerHeader(Opcode.SMSG_EMOTE),

@@ -11,6 +11,12 @@ SMSG_ADDON_INFO = construct.Struct(
 	'data' / construct.Bytes(construct.this.header.size - 2),
 )
 
+def make_SMSG_ADDON_INFO(data: bytes):
+	return SMSG_ADDON_INFO.build(dict(
+		header=dict(size=len(data) + 2),
+		data=data,
+	))
+
 SMSG_CLIENTCACHE_VERSION = construct.Struct(
 	'header' / ServerHeader(Opcode.SMSG_CLIENTCACHE_VERSION, 4),
 	'version' / construct.Default(construct.Int32ul, 3),

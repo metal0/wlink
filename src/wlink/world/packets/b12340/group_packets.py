@@ -14,8 +14,20 @@ from wlink.utility.construct import GuidConstruct, NegatedFlag
 # SMSG_PARTY_COMMAND_RESULT = 0x07F
 # UMSG_UPDATE_GROUP_MEMBERS = 0x080
 
-CMSG_GROUP_DISBAND = construct.Struct('header' / ClientHeader(Opcode.CMSG_GROUP_DISBAND, 0))
-SMSG_GROUP_DESTROYED = construct.Struct('header' / ServerHeader(Opcode.SMSG_GROUP_DESTROYED, 0))
+CMSG_GROUP_DISBAND = construct.Struct(
+	'header' / ClientHeader(Opcode.CMSG_GROUP_DISBAND, 0)
+)
+
+def make_CMSG_GROUP_DISBAND():
+	return CMSG_GROUP_DISBAND.build(dict())
+
+
+SMSG_GROUP_DESTROYED = construct.Struct(
+	'header' / ServerHeader(Opcode.SMSG_GROUP_DESTROYED, 0)
+)
+
+def make_SMSG_GROUP_DESTROYED():
+	return SMSG_GROUP_DESTROYED.build(dict())
 
 CMSG_GROUP_UNINVITE = construct.Struct(
 	'header' / ClientHeader(Opcode.CMSG_GROUP_UNINVITE),
@@ -23,11 +35,24 @@ CMSG_GROUP_UNINVITE = construct.Struct(
 	construct.Padding(4),
 )
 
+def make_CMSG_GROUP_UNINVITE(member: str):
+	return CMSG_GROUP_UNINVITE.build(dict(
+		header=dict(size=4 + len(member) + 1 + 4),
+		member=member
+	))
+
+
 CMSG_GROUP_UNINVITE_GUID = construct.Struct(
 	'header' / ClientHeader(Opcode.CMSG_GROUP_UNINVITE_GUID),
 	'guid' / GuidConstruct(Guid),
 	'reason' / construct.CString('utf8')
 )
+
+def make_CMSG_GROUP_UNINVITE_GUID(member: str, reason: str):
+	return CMSG_GROUP_UNINVITE_GUID.build(dict(
+		header=dict(size=4 + len(reason) + 1 + GuidConstruct(Guid).sizeof()),
+		guid=member, reason=reason
+	))
 
 SMSG_GROUP_UNINVITE = construct.Struct('header' / ServerHeader(Opcode.SMSG_GROUP_UNINVITE, 0))
 
@@ -39,25 +64,46 @@ CMSG_GROUP_CANCEL = construct.Struct(
 	'header' / ClientHeader(Opcode.CMSG_GROUP_CANCEL, 0),
 )
 
+def make_CMSG_GROUP_CANCEL():
+	return CMSG_GROUP_CANCEL.build(dict())
+
 CMSG_GROUP_DECLINE = construct.Struct(
 	'header' / ClientHeader(Opcode.CMSG_GROUP_DECLINE, 0),
 )
+
+def make_CMSG_GROUP_DECLINE():
+	return CMSG_GROUP_DECLINE.build(dict())
 
 SMSG_GROUP_DECLINE = construct.Struct(
 	'header' / ServerHeader(Opcode.SMSG_GROUP_DECLINE, 4),
 	'decliner' / construct.CString('utf8'),
 )
 
+def make_SMSG_GROUP_DECLINE(decliner: str):
+	return SMSG_GROUP_DECLINE.build(dict(
+		header=dict(size=4 + len(decliner) + 1),
+		decliner=decliner
+	))
+
 CMSG_GROUP_ACCEPT = construct.Struct(
 	'header' / ClientHeader(Opcode.CMSG_GROUP_ACCEPT, 4),
 	construct.Padding(4)
 )
+
+def make_CMSG_GROUP_ACCEPT():
+	return CMSG_GROUP_ACCEPT.build(dict())
 
 CMSG_GROUP_INVITE = construct.Struct(
 	'header' / ClientHeader(Opcode.CMSG_GROUP_INVITE, 10),
 	'invitee' / construct.CString('utf8'),
 	construct.Padding(4)
 )
+
+def make_CMSG_GROUP_INVITE(invitee: str):
+	return CMSG_GROUP_INVITE.build(dict(
+		header=dict(size=4 + len(invitee) + 1 + 4),
+		invitee=invitee,
+	))
 
 SMSG_GROUP_INVITE = construct.Struct(
 	'header' / ServerHeader(Opcode.SMSG_GROUP_INVITE, 10),
@@ -66,10 +112,22 @@ SMSG_GROUP_INVITE = construct.Struct(
 	construct.Padding(4 + 1 + 4)
 )
 
+def make_SMSG_GROUP_INVITE(inviter: str, in_group=False):
+	return SMSG_GROUP_INVITE.build(dict(
+		header=dict(size=1 + len(inviter) + 4 + 1 + 4),
+		in_group=in_group,
+		inviter=inviter
+	))
+
 SMSG_GROUP_JOINED_BATTLEGROUND = construct.Struct(
-	'header' / ServerHeader(Opcode.SMSG_GROUP_JOINED_BATTLEGROUND),
+	'header' / ServerHeader(Opcode.SMSG_GROUP_JOINED_BATTLEGROUND, size=4),
 	'id' / construct.Int32ul
 )
+
+def make_SMSG_GROUP_JOINED_BATTLEGROUND(inviter: str, in_group=False):
+	return SMSG_GROUP_JOINED_BATTLEGROUND.build(dict(
+		id=id,
+	))
 
 GroupMemberInfo = construct.Struct(
 	'name' / construct.CString('utf8'),
