@@ -220,3 +220,8 @@ SMSG_EMOTE = construct.Struct(
 	'emote_id' / construct.Int32ul,
 	'guid' / GuidConstruct(Guid),
 )
+
+__all__ = [
+	'SMSG_EMOTE', 'SMSG_MESSAGECHAT', 'SMSG_GM_MESSAGECHAT', 'MessageType', 'CMSG_MESSAGECHAT', 'ChannelMessage',
+	'AchievementMessage', 'BGMessage', 'MonsterMessage', 'DefaultMessage', 'WhisperForeign', 'Language'
+]

@@ -10,3 +10,5 @@ SMSG_BIND_POINT_UPDATE = construct.Struct(
 	'map_id' / construct.Int32ul,
 	'area_id' / construct.Int32ul,
 )
+
+__all__ = ['SMSG_BIND_POINT_UPDATE']

@@ -12,11 +12,7 @@ CMSG_NAME_QUERY = construct.Struct(
 	'guid' / GuidConstruct(Guid)
 )
 
-def send_CMSG_NAME_QUERY(guid):
-	"""
-	Sends an unencrypted CMSG_NAME_QUERY packet.
-	:return: None.
-	"""
+def make_CMSG_NAME_QUERY(guid):
 	return CMSG_NAME_QUERY.build(dict(guid=guid))
 
 NameInfo = construct.Struct(
@@ -46,3 +42,7 @@ def make_SMSG_NAME_QUERY_RESPONSE(guid, found: bool, info):
 		header=dict(size=2 + guid_size + 2 + info_size),
 		guid=guid, found=found, info=info
 	))
+
+__all__ = [
+	'make_CMSG_NAME_QUERY', 'make_SMSG_NAME_QUERY_RESPONSE', 'CMSG_NAME_QUERY', 'SMSG_NAME_QUERY_RESPONSE', 'NameInfo'
+]

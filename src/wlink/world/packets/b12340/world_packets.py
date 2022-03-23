@@ -162,3 +162,10 @@ SMSG_HEALTH_UPDATE = construct.Struct(
     'guid' / GuidConstruct(Guid),
     'health' / construct.Int32ul
 )
+
+__all__ = [
+    'SMSG_WEATHER', 'SMSG_HEALTH_UPDATE', 'SMSG_NEW_WORLD', 'SMSG_CANCEL_COMBAT', 'SMSG_PLAY_SOUND',
+    'SMSG_TRANSFER_ABORTED', 'SMSG_TRANSFER_PENDING', 'CMSG_SPIRIT_HEALER_ACTIVATE', 'CMSG_AREA_SPIRIT_HEALER_QUERY',
+    'CMSG_BATTLEMASTER_HELLO', 'CMSG_BANKER_ACTIVATE', 'CMSG_GUILD_BANKER_ACTIVATE', 'TransferAbortedReason',
+    'WeatherState', 'TransferTransportInfo', 'WeatherType',
+]

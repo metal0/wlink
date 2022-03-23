@@ -9,3 +9,7 @@ SMSG_INVALIDATE_PLAYER = construct.Struct(
     'header' / ServerHeader(Opcode.SMSG_INVALIDATE_PLAYER),
     'player_guid' / GuidConstruct(Guid)
 )
+
+__all__ = [
+    'SMSG_INVALIDATE_PLAYER'
+]

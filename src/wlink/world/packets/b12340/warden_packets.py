@@ -4,7 +4,7 @@ from .headers import ServerHeader, ClientHeader
 from .opcode import Opcode
 
 SMSG_WARDEN_DATA = construct.Struct(
-	'header' / ServerHeader(Opcode.SMSG_WARDEN_DATA, size=39),
+	'header' / ServerHeader(Opcode.SMSG_WARDEN_DATA, body_size=39),
 	'encrypted' / construct.GreedyBytes
 )
 
@@ -27,3 +27,7 @@ def make_CMSG_WARDEN_DATA(encrypted: bytes):
 		header=dict(size=4 + len(encrypted)),
 		encrypted=encrypted
 	))
+
+__all__ = [
+	'make_CMSG_WARDEN_DATA', 'make_SMSG_WARDEN_DATA', 'CMSG_WARDEN_DATA', 'SMSG_WARDEN_DATA'
+]

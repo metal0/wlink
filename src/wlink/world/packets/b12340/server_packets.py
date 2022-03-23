@@ -41,3 +41,7 @@ def make_SMSG_MOTD(lines):
 		header=dict(size=size),
 		lines=lines
 	))
+
+__all__ = [
+	'SMSG_MOTD', 'SMSG_NOTIFICATION', 'SMSG_SERVER_MESSAGE', 'ServerMessageType', 'make_SMSG_MOTD'
+]

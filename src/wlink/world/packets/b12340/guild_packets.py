@@ -9,7 +9,6 @@ from .headers import ServerHeader, ClientHeader
 from .opcode import Opcode
 from wlink.guid import Guid
 
-
 class GuildBankData:
 	max_tabs = 6
 	max_slots = 98
@@ -226,7 +225,7 @@ SMSG_GUILD_QUERY_RESPONSE = construct.Struct(
 	'num_ranks' / construct.Int32ul,
 )
 
-async def send_SMSG_GUILD_QUERY_RESPONSE(
+def make_SMSG_GUILD_QUERY_RESPONSE(
 	guild_id: int,	name: str,ranks: List[str],
 	emblem_style: int, emblem_color: int,
 	border_style: int,border_color: int,
@@ -235,7 +234,7 @@ async def send_SMSG_GUILD_QUERY_RESPONSE(
 ):
 	ranks_size = sum((len(s) + 1 for s in ranks))
 	return SMSG_GUILD_QUERY_RESPONSE.build(dict(
-		header=dict(size=4 + len(name) + 1 + ranks_size + 4 * 6),
+		header=dict(size=2 + len(name) + 1 + ranks_size + 4 * 6),
 		guild_id=guild_id,
 		name=name,
 		ranks=ranks,
@@ -288,7 +287,7 @@ SMSG_GUILD_INFO = construct.Struct(
 
 CMSG_GUILD_INFO_TEXT = construct.Struct(
 	'header' / ClientHeader(Opcode.CMSG_GUILD_INFO_TEXT),
-	'info' / construct.CString('utf8'), # max length is 500 (TODO: check for overflow)
+	'info' / construct.CString('utf8'),  # max length is 500 (TODO: check for overflow)
 )
 
 def make_CMSG_GUILD_INFO_TEXT(info: str):
@@ -310,3 +309,16 @@ SMSG_GUILD_EVENT_LOG_QUERY = construct.Struct(
 
 def make_SMSG_GUILD_EVENT_LOG_QUERY():
 	return SMSG_GUILD_EVENT_LOG_QUERY.build(dict())
+
+
+__all__ = [
+	'make_SMSG_GUILD_EVENT_LOG_QUERY', 'make_CMSG_GUILD_EVENT_LOG_QUERY', 'make_CMSG_GUILD_QUERY',
+	'make_CMSG_GUILD_INFO_TEXT', 'make_CMSG_GUILD_INFO', 'make_SMSG_GUILD_INVITE', 'make_CMSG_GUILD_ACCEPT',
+	'make_CMSG_GUILD_ROSTER', 'make_CMSG_GUILD_DECLINE', 'make_CMSG_GUILD_CREATE', 'make_CMSG_GUILD_SET_PUBLIC_NOTE',
+	'CMSG_GUILD_EVENT_LOG_QUERY', 'CMSG_GUILD_QUERY', 'CMSG_GUILD_DECLINE', 'CMSG_GUILD_CREATE', 'CMSG_GUILD_MOTD',
+	'CMSG_GUILD_INVITE', 'CMSG_GUILD_ACCEPT', 'CMSG_GUILD_ROSTER', 'CMSG_GUILD_INFO_TEXT', 'CMSG_GUILD_INFO',
+	'CMSG_GUILD_SET_PUBLIC_NOTE', 'CMSG_GUILD_SET_OFFICER_NOTE', 'SMSG_GUILD_EVENT', 'SMSG_GUILD_EVENT_LOG_QUERY',
+	'SMSG_GUILD_INFO', 'SMSG_GUILD_INVITE', 'SMSG_GUILD_ROSTER', 'SMSG_GUILD_COMMAND_RESULT',
+	'SMSG_GUILD_QUERY_RESPONSE', 'GuildEventType', 'GuildMemberDataType', 'GuildCommandType', 'GuildBankRightsData',
+	'GuildRankData', 'GuildBankData', 'RosterMemberData', 'GuildCommandError', 'MemberStatus'
+]

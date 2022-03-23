@@ -9,3 +9,7 @@ CMSG_KEEP_ALIVE = construct.Struct(
 
 def make_CMSG_KEEP_ALIVE():
 	return CMSG_KEEP_ALIVE.build(dict())
+
+__all__ = [
+	'make_CMSG_KEEP_ALIVE', 'CMSG_KEEP_ALIVE'
+]

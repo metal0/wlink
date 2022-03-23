@@ -14,9 +14,8 @@ class MailType(Enum):
     gameobject = 4
     calendar = 5
 
-
 CMSG_GET_MAIL_LIST = construct.Struct(
-    'header' / ClientHeader(Opcode.CMSG_GET_MAIL_LIST, 8),
+    'header' / ClientHeader(Opcode.CMSG_GET_MAIL_LIST, body_size=8),
     'mailbox' / GuidConstruct(Guid),
 )
 
@@ -185,3 +184,10 @@ def make_CMSG_MAIL_TAKE_MONEY(mailbox, mailbox_id):
         mailbox=mailbox,
         mailbox_id=mailbox_id
     ))
+
+__all__ = [
+    'make_CMSG_MAIL_TAKE_MONEY', 'make_CMSG_SEND_MAIL', 'make_CMSG_GET_MAIL_LIST', 'CMSG_MAIL_TAKE_MONEY',
+    'CMSG_SEND_MAIL', 'CMSG_GET_MAIL_LIST', 'SMSG_SEND_MAIL_RESULT', 'SMSG_MAIL_LIST_RESULT', 'SMSG_RECEIVED_MAIL',
+    'SMSG_SHOW_MAILBOX', 'MailResponse', 'MailType', 'MailResponseType', 'MailMessageData', 'MailItemData',
+    'MailEnchantmentInfo'
+]

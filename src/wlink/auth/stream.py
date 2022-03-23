@@ -3,13 +3,20 @@ import trio
 
 from ..log import logger
 
-class AuthProtocol:
+class AuthStream:
 	def __init__(self, stream: trio.abc.HalfCloseableStream):
 		self.stream = stream
 		self._send_lock = trio.Lock()
 		self._read_lock = trio.Lock()
 
-	async def send_all(self, data: bytes):
+	async def send_packet(self, packet_type, data: bytes):
+		packet = packet_type.parse(data)
+		await self._send_all(data)
+
+		logger.log('PACKETS', f'{packet=}')
+		logger.log('PACKETS', f'{data=}')
+
+	async def _send_all(self, data: bytes):
 		async with self._send_lock:
 			await self.stream.send_all(data)
 
@@ -23,7 +30,8 @@ class AuthProtocol:
 			try:
 				data.extend(await self._receive_some())
 				packet = packet_type.parse(data)
-				logger.log('PACKETS', f'{data=} {packet=}')
+				logger.log('PACKETS', f'{packet=}')
+				logger.log('PACKETS', f'{data=}')
 				return packet
 			except construct.ConstructError:
 				pass

@@ -136,7 +136,7 @@ CMSG_CHAR_ENUM = construct.Struct(
 	'header' / ClientHeader(Opcode.CMSG_CHAR_ENUM, 0),
 )
 
-def send_CMSG_CHAR_ENUM():
+def make_CMSG_CHAR_ENUM():
 	return CMSG_CHAR_ENUM.build(dict())
 
 SMSG_CHAR_ENUM = construct.Struct(

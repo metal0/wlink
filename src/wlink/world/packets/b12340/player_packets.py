@@ -29,3 +29,7 @@ SMSG_SET_PROFICIENCY = construct.Struct(
 	'item_class' / PackEnum(ItemClass, construct.Byte),
 	'item_subclass_mask' / construct.Int32ul
 )
+
+__all__ = [
+    'SMSG_SET_PROFICIENCY', 'ItemClass'
+]
