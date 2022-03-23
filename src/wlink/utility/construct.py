@@ -125,7 +125,28 @@ class ConstructEnumAdapter(construct.Enum):
 
 		return super()._encode(int(obj), context, path)
 
+class ConstructFlagsEnumAdapter(construct.FlagsEnum):
+	def __init__(self, enum_type, subcon, *merge, **mapping):
+		super().__init__(subcon, *merge, **mapping)
+		self.enum_type = enum_type
+
+	def _decode(self, obj, context, path):
+		return self.enum_type(super()._decode(obj, context, path))
+
+	def _encode(self, obj, context, path):
+		try:
+			obj = obj.value
+		except AttributeError:
+			pass
+
+		if isinstance(obj, Tuple):
+			obj = obj[0]
+
+		return super()._encode(int(obj), context, path)
+
 PackEnum = lambda enum_type, subcon=construct.Byte: ConstructEnumAdapter(enum_type=enum_type, subcon=subcon)
+
+PackFlagsEnum = lambda enum_type, subcon=construct.Byte: ConstructEnumAdapter(enum_type=enum_type, subcon=subcon)
 
 class VersionStringFromBytesAdapter(construct.StringEncoded):
 	def __init__(self, num_bytes, encoding='ascii'):

@@ -14,11 +14,18 @@ class MailType(Enum):
     gameobject = 4
     calendar = 5
 
-
 CMSG_GET_MAIL_LIST = construct.Struct(
-    'header' / ClientHeader(Opcode.CMSG_GET_MAIL_LIST, 8),
+    'header' / ClientHeader(Opcode.CMSG_GET_MAIL_LIST, body_size=8),
     'mailbox' / GuidConstruct(Guid),
 )
+
+def make_CMSG_GET_MAIL_LIST(mailbox):
+    if type(mailbox) is int:
+        mailbox = Guid(mailbox)
+
+    return CMSG_GET_MAIL_LIST.build(dict(
+        mailbox=mailbox
+    ))
 
 MailEnchantmentInfo = construct.Struct(
     'charges' / construct.Int32ul,
@@ -98,6 +105,27 @@ CMSG_SEND_MAIL = construct.Struct(
     construct.Padding(9),
 )
 
+def make_CMSG_SEND_MAIL(self, mailbox, receiver: str, subject: str, body: str, items=(), money=0, cod=0):
+    if type(mailbox) is int:
+        mailbox = Guid(mailbox)
+
+    data_size = 8
+    data_size += len(receiver) + 1
+    data_size += len(subject) + 1
+    data_size += len(body) + 1
+    data_size += 8
+    data_size += len(items) * (1 + 8) + 1
+    data_size += 4 * 2
+    data_size += 9
+
+    return CMSG_SEND_MAIL.build(dict(
+        header=dict(size=4 + data_size),
+        mailbox=mailbox,
+        receiver=receiver,
+        subject=subject, body=body,
+        items=items, money=money, cod=cod
+    ))
+
 class MailResponseType(Enum):
     send = 0
     money_taken = 1
@@ -146,3 +174,20 @@ CMSG_MAIL_TAKE_MONEY = construct.Struct(
     'mailbox' / GuidConstruct(Guid),
     'mailbox_id' / construct.Int32ul,
 )
+
+
+def make_CMSG_MAIL_TAKE_MONEY(mailbox, mailbox_id):
+    if type(mailbox) is int:
+        mailbox = Guid(mailbox)
+
+    return CMSG_MAIL_TAKE_MONEY.build(dict(
+        mailbox=mailbox,
+        mailbox_id=mailbox_id
+    ))
+
+__all__ = [
+    'make_CMSG_MAIL_TAKE_MONEY', 'make_CMSG_SEND_MAIL', 'make_CMSG_GET_MAIL_LIST', 'CMSG_MAIL_TAKE_MONEY',
+    'CMSG_SEND_MAIL', 'CMSG_GET_MAIL_LIST', 'SMSG_SEND_MAIL_RESULT', 'SMSG_MAIL_LIST_RESULT', 'SMSG_RECEIVED_MAIL',
+    'SMSG_SHOW_MAILBOX', 'MailResponse', 'MailType', 'MailResponseType', 'MailMessageData', 'MailItemData',
+    'MailEnchantmentInfo'
+]

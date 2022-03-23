@@ -6,5 +6,4 @@ def test_SMSG_WHO():
 	print(packet)
 
 	assert packet.header.size == 10
-	assert packet.total_num_matches == 0
 	assert len(packet.matches) == 0

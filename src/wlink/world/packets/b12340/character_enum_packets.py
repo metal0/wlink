@@ -103,6 +103,31 @@ CMSG_CHAR_CREATE = construct.Struct(
 	'outfit_id' / construct.Byte,
 )
 
+def make_CMSG_CHAR_CREATE(name: str,
+	race=Race.human,
+	combat_class=CombatClass.rogue,
+	gender=Gender.male,
+	skin=0,
+	face=0,
+	hair_style=0,
+	hair_color=0,
+	facial_hair=0,
+	outfit_id=0,
+):
+	return CMSG_CHAR_CREATE.build(dict(
+		header=dict(size=(len(name) + 1) + 9 + 4),
+		name=name,
+		race=race,
+		combat_class=combat_class,
+		gender=gender,
+		skin=skin,
+		face=face,
+		hair_style=hair_style,
+		hair_color=hair_color,
+		facial_hair=facial_hair,
+		outfit_id=outfit_id,
+	))
+
 SMSG_CHAR_CREATE = construct.Struct(
 	'header' / ServerHeader(Opcode.SMSG_CHAR_CREATE),
 )
@@ -111,16 +136,36 @@ CMSG_CHAR_ENUM = construct.Struct(
 	'header' / ClientHeader(Opcode.CMSG_CHAR_ENUM, 0),
 )
 
+def make_CMSG_CHAR_ENUM():
+	return CMSG_CHAR_ENUM.build(dict())
+
 SMSG_CHAR_ENUM = construct.Struct(
 	'header' / ServerHeader(Opcode.SMSG_CHAR_ENUM, 4 + construct.len_(construct.this.characters)),
 	'characters' / construct.PrefixedArray(construct.Byte, CharacterInfo),
 )
+
+def make_SMSG_CHAR_ENUM(characters=None):
+	raise NotImplemented()
+	# return SMSG_CHAR_ENUM.build(dict())
+
 
 CMSG_CHAR_RENAME = construct.Struct(
 	'header' / ClientHeader(Opcode.CMSG_CHAR_RENAME),
 	'guid' / GuidConstruct(Guid),
 	'new_name' / construct.CString('utf8')
 )
+
+
+def make_CMSG_CHAR_RENAME(new_name: str, guid):
+	"""
+	Sends an encrypted CMSG_CHAR_RENAME packet.
+	:return: None.
+	"""
+	return CMSG_CHAR_RENAME.build(dict(
+		header=dict(size=len(new_name) + 1 + 8 + 4),
+		guid=guid,
+		new_name=new_name
+	))
 
 RenameInfo = construct.Struct(
 	'guid' / GuidConstruct(Guid),

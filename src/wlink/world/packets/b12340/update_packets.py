@@ -109,6 +109,19 @@ MovementBlock = construct.Struct(
 	'go_rotation' / construct.If(construct.this.flags.game_object_rotation, GameObjectRotationInfo),
 )
 
+class ObjectUpdateFlags(Enum):
+	none = 0x0000
+	self = 0x0001
+	transport = 0x0002
+	has_target = 0x0004
+	unknown = 0x0008
+	low_guid = 0x0010
+	living = 0x0020
+	stationary_position = 0x0040
+	vehicle = 0x0080
+	position = 0x0100
+	rotation = 0x0200
+
 CreateObjectUpdate = construct.Struct(
 	'guid' / PackGuid(Guid),
 	'type' / PackEnum(ObjectType),
@@ -116,13 +129,20 @@ CreateObjectUpdate = construct.Struct(
 )
 
 CreateObject2Update = construct.Struct()
-MovementUpdate = construct.Struct()
+MovementUpdate = construct.Struct(
+	'guid' / PackGuid(Guid),
+	'flags' / construct.Int16ul,
+	# construct.IfThenElse(
+	# )
+)
 NearObjectsUpdate = construct.Struct()
-OutOfRangeObjectsUpdate = construct.Struct()
+OutOfRangeObjectsUpdate = construct.Struct(
+	'out_of_range_guids' / construct.PrefixedArray(construct.Int32ul, PackGuid(Guid))
+)
 
 Update = construct.Struct(
 	'type' / PackEnum(UpdateType),
-	'update' / construct.Switch(
+	'contents' / construct.Switch(
 		construct.this.type, {
 			UpdateType.partial: ValuesUpdate,
 			UpdateType.create_object: CreateObjectUpdate,
@@ -134,19 +154,17 @@ Update = construct.Struct(
 	),
 )
 
+UpdatesType = construct.PrefixedArray(construct.Int32ul, Update)
+
 SMSG_UPDATE_OBJECT = construct.Struct(
 	'header' / ServerHeader(Opcode.SMSG_UPDATE_OBJECT, 0),
-	# construct.Padding(1),
-	'updates' / construct.PrefixedArray(construct.Int32ul, Update),
-)
-
-CompressedUpdateStub = construct.Struct(
+	'updates' / UpdatesType,
 )
 
 SMSG_COMPRESSED_UPDATE_OBJECT = construct.Struct(
 	'header' / ServerHeader(Opcode.SMSG_COMPRESSED_UPDATE_OBJECT, 0),
 	'uncompressed_size' / construct.Int32ul,
-	'updates' / construct.Compressed(construct.PrefixedArray(construct.Int32ul, Update), 'zlib')
+	'updates' / construct.Compressed(UpdatesType, 'zlib')
 )
 
 SMSG_DESTROY_OBJECT = construct.Struct(
@@ -154,3 +172,11 @@ SMSG_DESTROY_OBJECT = construct.Struct(
 	'guid' / GuidConstruct(Guid),
 	'player' / construct.Flag, # Not sure
 )
+
+__all__ = [
+	'SMSG_DESTROY_OBJECT', 'SMSG_UPDATE_OBJECT', 'SMSG_COMPRESSED_UPDATE_OBJECT',
+	'CreateObjectUpdate', 'CreateObject2Update', 'ObjectUpdateInfo', 'ObjectType', 'OutOfRangeObjectsUpdate',
+	'GameObjectPositionInfo', 'GameObjectRotationInfo', 'HasPositionInfo', 'UpdateType', 'Update', 'UpdateFlags',
+	'MovementUpdate', 'ValuesUpdate', 'NearObjectsUpdate', 'MovementInfo', 'MovementBlock', 'LivingMovementInfo',
+	'VehicleInfo', 'SplineInfo', 'TransportInfo', 'LowGuidInfo', 'HighGuidInfo', 'TargetGuidInfo',
+]

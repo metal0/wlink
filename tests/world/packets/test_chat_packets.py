@@ -25,7 +25,6 @@ def test_CMSG_MESSAGECHAT():
 # 2021-04-20 19:39:38.468 | PACKETS  | wlink.world.protocol:next_decrypted_packet:197 - data=b'\x00&\xc7\x00\x010\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xe9\xbc\xb5%T\x81\x00\xc6\x9b;\xb2DLE\x16A\xcee\xb7?\x00\x00\x00\x00'
 
 # 2021-04-20 21:24:50.233 | PACKETS  | wlink.world.protocol:next_decrypted_packet:182 - header=Container(size=11, opcode=<Opcode.SMSG_WEATHER: 756>)
-# 2021-04-20 21:24:50.233 | PACKETS  | wlink.world.protocol:next_decrypted_packet:200 - fragmentation: 1
 # 2021-04-20 21:24:50.233 | PACKETS  | wlink.world.protocol:next_decrypted_packet:201 - data=b'\x00\x0b\xf4\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00'
 
 def test_SMSG_MESSAGECHAT():

@@ -23,3 +23,4 @@ from .global_packets import *
 from .whois_packets import *
 from .headers import *
 from .opcode import Opcode
+from .parse import WorldServerPacketParser, WorldClientPacketParser

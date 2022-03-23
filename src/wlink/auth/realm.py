@@ -1,7 +1,7 @@
 import construct
 from enum import Enum
 
-from wlink.utility.construct import PackEnum, AddressPort
+from ..utility.construct import PackEnum, AddressPort
 
 class RealmType(Enum):
 	normal = 0
@@ -49,7 +49,7 @@ Realm = construct.Struct(
 	'flags' / construct.Default(PackEnum(RealmFlags), RealmFlags.none),
 	'name' / construct.CString('ascii'),
 	'address' / construct.Default(AddressPort('ascii'), ('127.0.0.1', 3724)),
-	'population' / construct.Float32l, # TODO: Figure out realm population encoding/decoding
+	'population' / construct.Float32l,  # TODO: Figure out realm population encoding/decoding
 	'num_characters' / construct.Default(construct.Byte, 1),
 	'timezone' / construct.Default(construct.Byte, 8),
 	'id' / construct.Default(construct.Byte, 1),

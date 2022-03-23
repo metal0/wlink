@@ -1,7 +1,5 @@
-import importlib
-from typing import Dict, Optional
-
-from wlink.world.packets import *
+from typing import Dict
+from . import *
 
 class WorldPacketParser:
 	def __init__(self):
@@ -62,7 +60,7 @@ class WorldServerPacketParser(WorldPacketParser):
 			Opcode.SMSG_DUEL_REQUESTED: SMSG_DUEL_REQUESTED,
 			Opcode.SMSG_DUEL_WINNER: SMSG_DUEL_WINNER,
 			Opcode.SMSG_DUEL_COMPLETE: SMSG_DUEL_COMPLETE,
-			Opcode.SMSG_UPDATE_OBJECT: SMSG_UPDATE_OBJECT,
+			# Opcode.SMSG_UPDATE_OBJECT: SMSG_UPDATE_OBJECT,
 			# Opcode.SMSG_COMPRESSED_UPDATE_OBJECT: SMSG_COMPRESSED_UPDATE_OBJECT,
 			Opcode.SMSG_DESTROY_OBJECT: SMSG_DESTROY_OBJECT,
 			Opcode.SMSG_MAIL_LIST_RESULT: SMSG_MAIL_LIST_RESULT,
@@ -114,6 +112,9 @@ class WorldClientPacketParser(WorldPacketParser):
 			(Opcode.CMSG_GROUP_DISBAND, CMSG_GROUP_DISBAND),
 			(Opcode.CMSG_CHAR_RENAME, CMSG_CHAR_RENAME),
 			(Opcode.CMSG_CHAR_CREATE, CMSG_CHAR_CREATE),
+			(Opcode.CMSG_WHOIS, CMSG_WHOIS),
+			(Opcode.CMSG_WHO, CMSG_WHO),
+			(Opcode.CMSG_WARDEN_DATA, CMSG_WARDEN_DATA)
 		]
 
 		for opcode, parser in parsers:
@@ -121,3 +122,7 @@ class WorldClientPacketParser(WorldPacketParser):
 
 	def parse(self, data: bytes, header, large=False):
 		return self._parsers[header.opcode].parse(data)
+
+__all__ = [
+	'WorldClientPacketParser', 'WorldServerPacketParser', 'WorldPacketParser'
+]
