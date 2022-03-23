@@ -132,5 +132,5 @@ def test_SMSG_GUILD_INVITE():
 	print(packet)
 
 	assert packet.header.size == 25
-	assert packet.inviter == 'Act'
+	assert packet.sender == 'Act'
 	assert packet.guild == 'Carpe Kindergarten'

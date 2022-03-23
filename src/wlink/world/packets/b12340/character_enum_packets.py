@@ -103,7 +103,7 @@ CMSG_CHAR_CREATE = construct.Struct(
 	'outfit_id' / construct.Byte,
 )
 
-def make_CMSG_CHAR_CREATE(self, name: str,
+def make_CMSG_CHAR_CREATE(name: str,
 	race=Race.human,
 	combat_class=CombatClass.rogue,
 	gender=Gender.male,

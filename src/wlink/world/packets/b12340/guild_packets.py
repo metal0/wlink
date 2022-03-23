@@ -152,14 +152,14 @@ CMSG_GUILD_INVITE = construct.Struct(
 
 SMSG_GUILD_INVITE = construct.Struct(
 	'header' / ServerHeader(Opcode.SMSG_GUILD_INVITE, 10),
-	'inviter' / construct.CString('utf8'),
+	'sender' / construct.CString('utf8'),
 	'guild' / construct.CString('utf8')
 )
 
-def make_SMSG_GUILD_INVITE(inviter: str, guild: str):
+def make_SMSG_GUILD_INVITE(sender: str, guild: str):
 	return SMSG_GUILD_INVITE.build(dict(
-		header=dict(size=len(inviter) + len(guild) + 2),
-		inviter=inviter,
+		header=dict(size=len(sender) + len(guild) + 2),
+		sender=sender,
 		guild=guild
 	))
 

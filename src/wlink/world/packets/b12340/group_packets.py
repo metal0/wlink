@@ -109,31 +109,31 @@ def make_CMSG_GROUP_ACCEPT():
 
 CMSG_GROUP_INVITE = construct.Struct(
     'header' / ClientHeader(Opcode.CMSG_GROUP_INVITE, 10),
-    'invitee' / construct.CString('utf8'),
+    'recipient' / construct.CString('utf8'),
     construct.Padding(4)
 )
 
 
-def make_CMSG_GROUP_INVITE(invitee: str):
+def make_CMSG_GROUP_INVITE(recipient: str):
     return CMSG_GROUP_INVITE.build(dict(
-        header=dict(size=4 + len(invitee) + 1 + 4),
-        invitee=invitee,
+        header=dict(size=4 + len(recipient) + 1 + 4),
+        recipient=recipient,
     ))
 
 
 SMSG_GROUP_INVITE = construct.Struct(
     'header' / ServerHeader(Opcode.SMSG_GROUP_INVITE, 10),
     'can_accept' / construct.Flag,
-    'inviter' / construct.CString('utf8'),
+    'sender' / construct.CString('utf8'),
     construct.Padding(4 + 1 + 4)
 )
 
 
-def make_SMSG_GROUP_INVITE(inviter: str, in_group=False):
+def make_SMSG_GROUP_INVITE(sender: str, in_group=False):
     return SMSG_GROUP_INVITE.build(dict(
-        header=dict(size=1 + len(inviter) + 4 + 1 + 4),
+        header=dict(size=1 + len(sender) + 4 + 1 + 4),
         in_group=in_group,
-        inviter=inviter
+        sender=sender
     ))
 
 
