@@ -7,39 +7,48 @@ from wlink.guid import Guid
 from .query_packets import NegatedFlag
 
 CMSG_DUEL_ACCEPTED = construct.Struct(
-	'header' / ClientHeader(Opcode.CMSG_DUEL_ACCEPTED, 8),
-	'unk' / construct.Default(GuidConstruct(Guid), Guid()),
+    "header" / ClientHeader(Opcode.CMSG_DUEL_ACCEPTED, 8),
+    "unk" / construct.Default(GuidConstruct(Guid), Guid()),
 )
+
+
 def make_CMSG_DUEL_ACCEPTED():
-	return CMSG_DUEL_ACCEPTED.build(dict())
+    return CMSG_DUEL_ACCEPTED.build(dict())
+
 
 CMSG_DUEL_CANCELLED = construct.Struct(
-	'header' / ClientHeader(Opcode.CMSG_DUEL_CANCELLED, 8),
-	'unk' / construct.Default(GuidConstruct(Guid), Guid()),
+    "header" / ClientHeader(Opcode.CMSG_DUEL_CANCELLED, 8),
+    "unk" / construct.Default(GuidConstruct(Guid), Guid()),
 )
 
+
 def make_CMSG_DUEL_CANCELLED():
-	return CMSG_DUEL_CANCELLED.build(dict())
+    return CMSG_DUEL_CANCELLED.build(dict())
+
 
 SMSG_DUEL_REQUESTED = construct.Struct(
-	'header' / ServerHeader(Opcode.SMSG_DUEL_REQUESTED, 8 + 8),
-	'flag_obj' / GuidConstruct(Guid),
-	'requester' / GuidConstruct(Guid),
+    "header" / ServerHeader(Opcode.SMSG_DUEL_REQUESTED, 8 + 8),
+    "flag_obj" / GuidConstruct(Guid),
+    "requester" / GuidConstruct(Guid),
 )
 
 SMSG_DUEL_COMPLETE = construct.Struct(
-	'header' / ServerHeader(Opcode.SMSG_DUEL_COMPLETE),
-	'cancelled' / NegatedFlag(),
+    "header" / ServerHeader(Opcode.SMSG_DUEL_COMPLETE),
+    "cancelled" / NegatedFlag(),
 )
 
 SMSG_DUEL_WINNER = construct.Struct(
-	'header' / ServerHeader(Opcode.SMSG_DUEL_WINNER),
-	'loser_fled' / construct.Flag,
-	'winner' / construct.CString('utf8'),
-    'loser' / construct.CString('utf8'),
+    "header" / ServerHeader(Opcode.SMSG_DUEL_WINNER),
+    "loser_fled" / construct.Flag,
+    "winner" / construct.CString("utf8"),
+    "loser" / construct.CString("utf8"),
 )
 
 __all__ = [
-	'SMSG_DUEL_WINNER', 'SMSG_DUEL_COMPLETE', 'SMSG_DUEL_REQUESTED', 'CMSG_DUEL_CANCELLED', 'CMSG_DUEL_ACCEPTED',
-	'make_CMSG_DUEL_ACCEPTED'
+    "SMSG_DUEL_WINNER",
+    "SMSG_DUEL_COMPLETE",
+    "SMSG_DUEL_REQUESTED",
+    "CMSG_DUEL_CANCELLED",
+    "CMSG_DUEL_ACCEPTED",
+    "make_CMSG_DUEL_ACCEPTED",
 ]

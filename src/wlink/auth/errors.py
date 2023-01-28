@@ -1,8 +1,10 @@
 class AuthError(Exception):
-	pass
+    pass
+
 
 class InvalidLogin(AuthError):
-	pass
+    pass
+
 
 class ProtocolError(AuthError):
-	pass
+    pass

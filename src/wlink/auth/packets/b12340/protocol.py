@@ -5,6 +5,7 @@ class AuthProtocol:
     def __init__(self):
         pass
 
+
 class AuthState(Enum):
     not_connected = 0
     connected = 1
@@ -13,13 +14,13 @@ class AuthState(Enum):
     realmlist_ready = 4
     disconnected = 5
 
+
 class AuthAction(Enum):
     connect = 0
 
 
-_transitions = dict(
-    (AuthState.not_connected)
-)
+_transitions = dict((AuthState.not_connected))
+
 
 class AuthStateMachine:
     def __init__(self):

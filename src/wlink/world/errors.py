@@ -1,5 +1,6 @@
 class ProtocolError(Exception):
-	pass
+    pass
+
 
 class Disconnected(Exception):
-	pass
+    pass

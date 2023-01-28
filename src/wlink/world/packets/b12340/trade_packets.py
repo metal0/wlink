@@ -3,7 +3,7 @@ import construct
 from wlink.world.packets import ClientHeader, Opcode
 
 CMSG_INITIATE_TRADE = construct.Struct(
-	'header' / ClientHeader(Opcode.CMSG_INITIATE_TRADE)
+    "header" / ClientHeader(Opcode.CMSG_INITIATE_TRADE)
 )
 # CMSG_BEGIN_TRADE = 0x117
 # CMSG_BUSY_TRADE = 0x118
@@ -17,6 +17,4 @@ CMSG_INITIATE_TRADE = construct.Struct(
 # SMSG_TRADE_STATUS = 0x120
 # SMSG_TRADE_STATUS_EXTENDED = 0x121
 
-__all__ = [
-	'CMSG_INITIATE_TRADE'
-]
+__all__ = ["CMSG_INITIATE_TRADE"]

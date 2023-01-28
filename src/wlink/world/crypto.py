@@ -3,9 +3,10 @@ import hmac
 
 from wlink.cryptography import rc4
 
+
 class WorldCrypto:
     def __init__(self, session_key: int, encryption_key: bytes, decryption_key: bytes):
-        session_key_bytes = session_key.to_bytes(length=40, byteorder='little')
+        session_key_bytes = session_key.to_bytes(length=40, byteorder="little")
         encrypt_hmac = hmac.new(key=encryption_key, digestmod=hashlib.sha1)
         encrypt_hmac.update(session_key_bytes)
 
