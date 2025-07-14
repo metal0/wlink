@@ -61,7 +61,8 @@ Realm = construct.Struct(
     "id" / construct.Default(construct.Byte, 1),
     "build_info"
     / construct.IfThenElse(
-        (construct.this.flags & RealmFlags.specify_build) == RealmFlags.specify_build,
+        (
+            #construct.this.flags & RealmFlags.specify_build) == RealmFlags.specify_build,
         BuildInfo,
         construct.Pass,
     ),
