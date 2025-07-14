@@ -53,7 +53,6 @@ Realm = construct.Struct(
     "status" / construct.Default(PackEnum(RealmStatus), RealmStatus.online),
     "flags" / construct.Default(PackEnum(RealmFlags), RealmFlags.none),
     "name" / construct.CString("ascii"),
-    "asd" / construct.CString("ascii"),
     "address" / construct.Default(AddressPort("ascii"), ("127.0.0.1", 3724)),
     "population"
     / construct.Float32l,  # TODO: Figure out realm population encoding/decoding
