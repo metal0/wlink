@@ -35,6 +35,7 @@ class RealmFlags(Enum):
     new_players = 0x20
     recommended = 0x40
     full = 0x80
+    wm1 = 96
 
     def __and__(self, other):
         value = self.value & other.value
