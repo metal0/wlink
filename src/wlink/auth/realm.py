@@ -50,8 +50,8 @@ BuildInfo = construct.Struct(
 
 Realm = construct.Struct(
     "type" / construct.Default(PackEnum(RealmType), RealmType.pvp),
-    "status" / construct.Default(PackEnum(RealmStatus), RealmStatus.online),
-    #"flags" / construct.Default(PackEnum(RealmFlags), RealmFlags.none),
+    #"status" / construct.Default(PackEnum(RealmStatus), RealmStatus.online),
+    "flags" / construct.Default(PackEnum(RealmFlags), RealmFlags.none),
     "name" / construct.CString("ascii"),
     "address" / construct.Default(AddressPort("ascii"), ("127.0.0.1", 3724)),
     "population"
@@ -61,7 +61,7 @@ Realm = construct.Struct(
     "id" / construct.Default(construct.Byte, 1),
     "build_info"
     / construct.IfThenElse(
-        False,#(construct.this.flags & RealmFlags.specify_build) == RealmFlags.specify_build,
+        (construct.this.flags & RealmFlags.specify_build) == RealmFlags.specify_build,
         BuildInfo,
         construct.Pass,
     ),

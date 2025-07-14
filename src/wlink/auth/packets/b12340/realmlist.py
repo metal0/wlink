@@ -40,11 +40,11 @@ def make_realmlist_response(realms):
             + 4
             + 3
         )
-        #if (
-        #    "flags" in realm
-        #    and (realm["flags"] & RealmFlags.specify_build)
-        #    == RealmFlags.specify_build.value
-        #):
-        #    size += 5
+        if (
+            "flags" in realm
+            and (realm["flags"] & RealmFlags.specify_build)
+            == RealmFlags.specify_build.value
+        ):
+            size += 5
 
     return RealmlistResponse.build(dict(realms=realms, size=size)) + b"\x10\x00"
