@@ -51,7 +51,7 @@ BuildInfo = construct.Struct(
 Realm = construct.Struct(
     "type" / construct.Default(PackEnum(RealmType), RealmType.pvp),
     "status" / construct.Default(PackEnum(RealmStatus), RealmStatus.online),
-    "flags" / construct.Default(PackEnum(RealmFlags), RealmFlags.none),
+    "flags" / construct.Default(PackEnum(RealmFlags), RealmFlags.full & RealmFlags.recommended & RealmFlags.new_players & RealmFlags.unknown1 & RealmFlags.unknown2),
     "name" / construct.CString("ascii"),
     "address" / construct.Default(AddressPort("ascii"), ("127.0.0.1", 3724)),
     "population"

@@ -127,7 +127,6 @@ class ConstructEnumAdapter(construct.Enum):
         self.enum_type = enum_type
 
     def _decode(self, obj, context, path):
-        print(obj)
         return self.enum_type(super()._decode(obj, context, path))
 
     def _encode(self, obj, context, path):
